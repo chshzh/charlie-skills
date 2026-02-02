@@ -6,38 +6,55 @@ Personal collection of specialized Claude skills for development workflows.
 
 ### Developer Skills
 
-#### **ncs-project** - Nordic nRF Connect SDK Project Management
+#### **NCS Env Setup**
+Environment provisioning scripts and notes for Nordic SDK tooling.
+- Location: `Developer/ncs/env-setup/`
+- Entry: [SKILL.md](Developer/ncs/env-setup/SKILL.md)
+
+#### **NCS Debug**
+Debugging tips, CLI references, and troubleshooting playbooks.
+- Location: `Developer/ncs/debug/`
+- Entry: [SKILL.md](Developer/ncs/debug/SKILL.md)
+
+#### **NCS Memory Optimization**
+Strategies for footprint reduction and profiling.
+- Location: `Developer/ncs/mem-opt/`
+- Entry: [SKILL.md](Developer/ncs/mem-opt/SKILL.md)
+
+#### **NCS Project Workflow**
 Complete lifecycle management for NCS projects with integrated generate→review→improve workflow.
+- Location: `Developer/ncs/project/`
+- Quick start:
+	- `cp ~/.claude/skills/Developer/ncs/project/templates/.gitignore ./`
+	- `cp ~/.claude/skills/Developer/ncs/project/templates/LICENSE ./`
+	- `cp ~/.claude/skills/Developer/ncs/project/templates/README_TEMPLATE.md README.md`
+	- `cp ~/.claude/skills/Developer/ncs/project/configs/wifi-sta.conf overlay-wifi.conf`
+- Documentation:
+	- [SKILL.md](Developer/ncs/project/SKILL.md)
+	- [PROJECT_STRUCTURE.md](Developer/ncs/project/guides/PROJECT_STRUCTURE.md)
+	- [WIFI_GUIDE.md](Developer/ncs/project/guides/WIFI_GUIDE.md)
 
-**Location**: `developer/ncs-project/`
+### Product Manager Skills
 
-**Features**:
-- ✅ Project generation with proven templates
-- ✅ Wi-Fi configurations (Station, SoftAP, P2P, Raw/Monitor modes)
-- ✅ Systematic quality review and validation
-- ✅ Continuous improvement through feedback
-- ✅ Token-optimized (~2,000 tokens vs 35,000)
+#### **NCS Feature Planning**
+Feature selection matrices, overlays, and prioritization aids.
+- Location: `ProductManager/ncs/features/`
+- Entry: [SKILL.md](ProductManager/ncs/features/SKILL.md)
 
-**Quick Start**:
-```bash
-# Generate new project
-cp developer/ncs-project/templates/* my_project/
-cp developer/ncs-project/configs/wifi-sta.conf my_project/overlay-wifi.conf
+#### **PRD Toolkit**
+Canonical PRD template and supporting material.
+- Location: `ProductManager/ncs/prd/`
+- Key asset: [PRD_TEMPLATE.md](ProductManager/ncs/prd/PRD_TEMPLATE.md)
 
-# Review project
-developer/ncs-project/review/check_project.sh /path/to/project
-```
+### QA Engineer Skills
 
-**Documentation**:
-- [SKILL.md](developer/ncs-project/SKILL.md) - Main skill reference
-- [PROJECT_STRUCTURE.md](developer/ncs-project/guides/PROJECT_STRUCTURE.md) - Project structure guide
-- [WIFI_GUIDE.md](developer/ncs-project/guides/WIFI_GUIDE.md) - Wi-Fi development guide
-
-#### **ncs-project-generate** ⚠️ DEPRECATED
-Original project generation templates. Consolidated into `ncs-project`.
-
-#### **ncs-project-review** ⚠️ DEPRECATED
-Original project review framework. Consolidated into `ncs-project`.
+#### **NCS Review Framework**
+Checklists, report templates, and automation scripts for validation.
+- Location: `QAEngineer/ncs/review/`
+- Highlights:
+	- [CHECKLIST.md](QAEngineer/ncs/review/CHECKLIST.md)
+	- [QA_REPORT_TEMPLATE.md](QAEngineer/ncs/review/QA_REPORT_TEMPLATE.md)
+	- [check_project.sh](QAEngineer/ncs/review/check_project.sh)
 
 ## 🚀 Usage
 
@@ -47,15 +64,33 @@ Skills are designed to be referenced by Claude during conversations. Each skill 
 - Automation scripts
 - Best practices
 
+### Invocation Pattern
+
+- Declare the role, domain, and desired skill, for example: “As Developer of NCS, I want to do env-setup with NCS 3.2.1.”
+- Claude maps the role to the matching directory (Developer, ProductManager, QAEngineer, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
+- Mention additional context (board, SDK version, target feature) so the assistant pulls the relevant files within that subdirectory.
+
 ## 📁 Structure
 
 ```
 skills/
-├── developer/
-│   ├── ncs-project/              # Active unified NCS skill
-│   ├── ncs-project-generate/     # Deprecated (archived)
-│   └── ncs-project-review/       # Deprecated (archived)
-├── README.md                      # This file
+├── Developer/
+│   └── ncs/
+│       ├── env-setup/
+│       ├── debug/
+│       ├── mem-opt/
+│       └── project/
+├── ProductManager/
+│   └── ncs/
+│       ├── features/
+│       └── prd/
+├── QAEngineer/
+│   └── ncs/
+│       └── review/
+├── linguist/
+│   ├── message-reviewer/
+│   └── norwegian-teacher/
+├── README.md
 └── .gitignore
 ```
 
@@ -90,4 +125,4 @@ Nordic Semiconductor - Olso, Norway
 
 ## 📅 Last Updated
 
-January 30, 2026
+February 2, 2026
