@@ -98,10 +98,10 @@ Each includes: Config requirements, code examples, memory needs, dependencies.
 
 | Tool | Purpose | Location |
 |------|---------|----------|
-| check_project.sh | Automated validation | [review/check_project.sh](review/check_project.sh) |
-| CHECKLIST.md | Review checklist | [review/CHECKLIST.md](review/CHECKLIST.md) |
-| QA_REPORT_TEMPLATE.md | QA report template | [review/QA_REPORT_TEMPLATE.md](review/QA_REPORT_TEMPLATE.md) |
-| IMPROVEMENT_GUIDE.md | Template feedback | [review/IMPROVEMENT_GUIDE.md](review/IMPROVEMENT_GUIDE.md) |
+| check_project.sh | Automated validation | [ProductManager/ncs/review/check_project.sh](ProductManager/ncs/review/check_project.sh) |
+| CHECKLIST.md | Review checklist | [ProductManager/ncs/review/CHECKLIST.md](ProductManager/ncs/review/CHECKLIST.md) |
+| QA_REPORT_TEMPLATE.md | QA report template | [ProductManager/ncs/review/QA_REPORT_TEMPLATE.md](ProductManager/ncs/review/QA_REPORT_TEMPLATE.md) |
+| IMPROVEMENT_GUIDE.md | Template feedback | [ProductManager/ncs/review/IMPROVEMENT_GUIDE.md](ProductManager/ncs/review/IMPROVEMENT_GUIDE.md) |
 
 ---
 
@@ -174,7 +174,7 @@ west build -p -b <board> -- \
 | Wi-Fi specifics | [guides/WIFI_GUIDE.md](guides/WIFI_GUIDE.md) |
 | Project structure | [guides/PROJECT_STRUCTURE.md](guides/PROJECT_STRUCTURE.md) |
 | Configuration | [guides/CONFIG_GUIDE.md](guides/CONFIG_GUIDE.md) |
-| Project review | [review/CHECKLIST.md](review/CHECKLIST.md) |
+| Project review | [ProductManager/ncs/review/CHECKLIST.md](ProductManager/ncs/review/CHECKLIST.md) |
 
 ---
 

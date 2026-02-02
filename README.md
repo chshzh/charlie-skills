@@ -46,15 +46,13 @@ Canonical PRD template and supporting material.
 - Location: `ProductManager/ncs/prd/`
 - Key asset: [PRD_TEMPLATE.md](ProductManager/ncs/prd/PRD_TEMPLATE.md)
 
-### QA Engineer Skills
-
 #### **NCS Review Framework**
-Checklists, report templates, and automation scripts for validation.
-- Location: `QAEngineer/ncs/review/`
+Checklists, report templates, and automation scripts for validating builds against the PRD.
+- Location: `ProductManager/ncs/review/`
 - Highlights:
-	- [CHECKLIST.md](QAEngineer/ncs/review/CHECKLIST.md)
-	- [QA_REPORT_TEMPLATE.md](QAEngineer/ncs/review/QA_REPORT_TEMPLATE.md)
-	- [check_project.sh](QAEngineer/ncs/review/check_project.sh)
+	- [CHECKLIST.md](ProductManager/ncs/review/CHECKLIST.md)
+	- [QA_REPORT_TEMPLATE.md](ProductManager/ncs/review/QA_REPORT_TEMPLATE.md)
+	- [check_project.sh](ProductManager/ncs/review/check_project.sh)
 
 ## 🚀 Usage
 
@@ -67,7 +65,7 @@ Skills are designed to be referenced by Claude during conversations. Each skill 
 ### Invocation Pattern
 
 - Declare the role, domain, and desired skill, for example: “As Developer of NCS, I want to do env-setup with NCS 3.2.1.”
-- Claude maps the role to the matching directory (Developer, ProductManager, QAEngineer, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
+- Claude maps the role to the matching directory (Developer, ProductManager, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
 - Mention additional context (board, SDK version, target feature) so the assistant pulls the relevant files within that subdirectory.
 
 ## 📁 Structure
@@ -83,9 +81,7 @@ skills/
 ├── ProductManager/
 │   └── ncs/
 │       ├── features/
-│       └── prd/
-├── QAEngineer/
-│   └── ncs/
+│       ├── prd/
 │       └── review/
 ├── linguist/
 │   ├── message-reviewer/

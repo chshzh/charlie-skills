@@ -73,18 +73,18 @@ west build -p -b nrf7002dk/nrf5340/cpuapp -- -DEXTRA_CONF_FILE=overlay-wifi-sta.
 
 **Quick automated check** (~1 min):
 ```bash
-~/.claude/skills/QAEngineer/ncs/review/check_project.sh /path/to/project
+~/.claude/skills/ProductManager/ncs/review/check_project.sh /path/to/project
 ```
 
 **Standard review** (2-3 hours):
-1. Use `review/CHECKLIST.md` as guide
-2. Fill out `review/QA_REPORT_TEMPLATE.md`
+1. Use `ProductManager/ncs/review/CHECKLIST.md` as guide
+2. Fill out `ProductManager/ncs/review/QA_REPORT_TEMPLATE.md`
 3. Generate recommendations
 
 ### Improve Templates
 
 After reviews, update templates based on findings:
-1. Document issues in `QAEngineer/ncs/review/IMPROVEMENT_GUIDE.md`
+1. Document issues in `ProductManager/ncs/review/IMPROVEMENT_GUIDE.md`
 2. Update relevant templates/configs
 3. Test improvements
 4. Deploy for next project
@@ -133,7 +133,7 @@ After reviews, update templates based on findings:
 # 1. Create project
 mkdir my_iot_device && cd my_iot_device
 mkdir -p src boards config docQuick reference checklist
-- `review/IMPROVEMENT_GUIDE.md` - Template feedback process
+- `ProductManager/ncs/review/IMPROVEMENT_GUIDE.md` - Template feedback process
 
 ### Examples
 - `examples/` - Reference implementations
@@ -215,12 +215,12 @@ git init && git add . && git commit -m "Initial commit"
 cat PRD.md  # Should reflect actual implementation
 
 # 1. Quick check
-~/.claude/skills/QAEngineer/ncs/review/check_project.sh .
+~/.claude/skills/ProductManager/ncs/review/check_project.sh .
 
 # 2. Fix critical issues immediately
 
 # 3. Request formal review
-# Reviewer uses review/CHECKLIST.md and PRD.md to validate requirements
+# Reviewer uses ProductManager/ncs/review/CHECKLIST.md and PRD.md to validate requirements
 # Generate QA report comparing implementation vs PRD
 
 # 4. Address findings
@@ -236,7 +236,7 @@ cat PRD.md  # Should reflect actual implementation
 
 ```bash
 # 1. Document common issues found
-# Add to review/IMPROVEMENT_GUIDE.md
+# Add to ProductManager/ncs/review/IMPROVEMENT_GUIDE.md
 
 # 2. Update templates
 # Fix gaps in templates/ or configs/
@@ -379,11 +379,7 @@ ncs-project/
 │   ├── FEATURE_SELECTION.md   # Feature selection guide (NEW!)
 │   └── ARCHITECTURE_PATTERNS.md # Multi-threaded vs SMF+zbus patterns (NEW!)
 │
-├── review/                     # Quality assurance resources
-│   ├── check_project.sh       # Automated checks (executable)
-│   ├── QA_REPORT_TEMPLATE.md  # Detailed QA report format
-│   ├── CHECKLIST.md           # Review checklist
-│   └── IMPROVEMENT_GUIDE.md   # Template improvement process
+├── (See ProductManager/ncs/review/) # Quality assurance resources now centralized under Product Manager
 │
 └── examples/                   # Reference implementations
     ├── basic_app/             # Minimal NCS application
@@ -473,13 +469,13 @@ ncs-project/
 
 **For reviews**:
 - Verify PRD.md exists and is accurate
-- Use `review/CHECKLIST.md`
-- Follow `review/QA_REPORT_TEMPLATE.md`
-- Run `review/check_project.sh`
+- Use `ProductManager/ncs/review/CHECKLIST.md`
+- Follow `ProductManager/ncs/review/QA_REPORT_TEMPLATE.md`
+- Run `ProductManager/ncs/review/check_project.sh`
 - Compare implementation against PRD requirements
 
 **For template improvements**:
-- Document in `review/IMPROVEMENT_GUIDE.md`
+- Document in `ProductManager/ncs/review/IMPROVEMENT_GUIDE.md`
 - Update affected templates (especially PRD_TEMPLATE.md)
 - Test with new project
 

@@ -32,13 +32,11 @@ Developer/ncs/project/
 
 ProductManager/ncs/
 ├── features/               # Modular feature overlays + references
-└── prd/                    # PRD templates and planning tools
-
-QAEngineer/ncs/
-└── review/                 # QA checklists, reports, automation
+├── prd/                    # PRD templates and planning tools
+└── review/                 # Review checklists, reports, automation
 ```
 
-# Full review: Use review/CHECKLIST.md
+# Full review: Use ProductManager/ncs/review/CHECKLIST.md
 ```
 
 ## 📁 Structure
@@ -122,7 +120,7 @@ Generate → Develop → Review → QA Report → Fix → Improve Templates → 
 
 **For generation**: See `SKILL.md` and `guides/PROJECT_STRUCTURE.md`  
 **For Wi-Fi**: See `guides/WIFI_GUIDE.md`  
-**For review**: Use `review/CHECKLIST.md`  
+**For review**: Use `ProductManager/ncs/review/CHECKLIST.md`  
 **For configs**: Check `guides/CONFIG_GUIDE.md`
 
 Start with `SKILL.md` for the complete quick reference!
