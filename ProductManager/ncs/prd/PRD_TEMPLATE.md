@@ -606,25 +606,81 @@ A: Answer description
 
 ## 9. Release & Maintenance
 
-### 9.1 Version History
+### 9.1 CI/CD Automation
+
+> **Workspace Application Requirement**: Every release-ready NCS project must follow the [workspace application pattern](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/app_dev/create_application.html#workspace_application) with automated CI/CD.
+
+**Required CI/CD Components**:
+
+1. **`west.yml` Manifest**
+   - Pin `sdk-nrf` revision (e.g., `v3.2.1`)
+   - Enable reproducible builds
+   - Support `west init -l <app>` workflow
+
+2. **GitHub Actions Workflow** (`.github/workflows/build.yml`)
+   - Extract NCS version from `west.yml`
+   - Use official container: `ghcr.io/nrfconnect/sdk-nrf-toolchain:${NCS_VERSION}`
+   - Build all supported board configurations
+   - Run quality gates before merge
+
+3. **Quality Gates** (Mandatory for PR approval)
+   - ✅ Documentation validation (README structure, required files)
+   - ✅ Static analysis (Zephyr checkpatch)
+   - ✅ Code formatting (clang-format with Zephyr rules)
+   - ✅ Build success for all target boards
+
+4. **Automated Release** (on version tags)
+   - Generate changelog from git history
+   - Build firmware for all boards
+   - Create release packages (`.hex` per board, combined `.zip`)
+   - Publish GitHub Release with auto-generated notes
+
+**Typical Workflow Structure**:
+```yaml
+jobs:
+  set-version:       # Extract NCS version from west.yml
+  build-and-test:    # Matrix build for all boards
+  validate-documentation:  # Check README & config files
+  static-analysis:   # Run checkpatch & clang-format
+  create-release:    # Auto-release on tags (depends on all above)
+```
+
+**Release Process**:
+```bash
+# 1. Update version documentation
+# 2. Create and push version tag
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+# 3. CI automatically builds, tests, and releases
+```
+
+**Quality Metrics**:
+- All PRs blocked until CI passes
+- Zero tolerance for formatting violations
+- Documentation completeness enforced
+- Release artifacts reproducible from tags
+
+**Reference Implementation**: See [`nordic_wifi_opus_audio_demo/.github/workflows/build.yml`](https://github.com/chshzh/nordic_wifi_opus_audio_demo/blob/main/.github/workflows/build.yml) or [`nordic_wifi_softap_webserver/.github/workflows/build.yml`](https://github.com/chshzh/nordic_wifi_softap_webserver/blob/main/.github/workflows/build.yml)
+
+### 9.2 Version History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | Date | Name | Initial release |
 | 1.1.0 | Date | Name | Feature additions |
 
-### 9.2 Known Limitations
+### 9.3 Known Limitations
 
 | Issue ID | Description | Severity | Workaround | Status |
 |----------|-------------|----------|------------|--------|
 | ISS-001 | Issue description | High/Medium/Low | Workaround | Open/Fixed |
 
-### 9.3 Product Roadmap
+### 9.4 Product Roadmap
 
 - **Version X.X**: Planned features
 - **Future**: Long-term plans
 
-### 9.4 Support & Maintenance Plan
+### 9.5 Support & Maintenance Plan
 
 - **Support Channels**: [List channels]
 - **Update Frequency**: [Schedule]

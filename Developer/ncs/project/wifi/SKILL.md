@@ -60,6 +60,13 @@ CONFIG_WIFI_READY_LIB=y
 CONFIG_HEAP_MEM_POOL_SIZE=80000  # Minimum!
 ```
 
+## 📡 SoftAP Playbook (New)
+
+- **Reserve the 192.168.7.0/24 subnet** – Configure SoftAP DHCP with the gateway at `192.168.7.1` and lease range `192.168.7.2-192.168.7.254`. Using a non-home-router subnet prevents IP conflicts and matches the latest QA-approved docs.
+- **Document the network everywhere** – README Quick Start tables, PRD networking sections, REST samples, and troubleshooting notes must all cite the same gateway/IP examples so validation scripts and support teams stay aligned.
+- **Ship credential templates** – Track `overlay-wifi-credentials.conf.template`, mention it in README.md, and add the real `overlay-wifi-credentials.conf` to `.gitignore`. Never log SSIDs/passwords at boot; the SoftAP project removed those logs after QA flagged them.
+- **Handle recovery** – When enabling SoftAP fails (radio busy, bad creds), add retry/back-off logic in your SMF/zbus states and capture the behavior in PRD acceptance criteria so QA can test it.
+
 ## 📊 Memory Requirements
 
 | Mode | Flash | RAM | Heap |

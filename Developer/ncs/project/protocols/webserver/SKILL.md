@@ -55,8 +55,14 @@ west build -p -b nrf7002dk/nrf5340/cpuapp -- \
   -DEXTRA_CONF_FILE="wifi-sta.conf;overlay-static-webserver.conf"
 
 # 5. Access web interface
-# http://192.168.1.99/  (or device IP)
+# http://192.168.7.1/  (default SoftAP gateway)
 # http://mydevice.local/  (if mDNS configured)
+
+## 🧪 QA-Driven Documentation Tips
+
+- **Mirror reality** – Keep REST examples, troubleshooting flows, and screenshots synchronized with the actual board build (button/LED counts, JSON payloads, default SSIDs). The SoftAP webserver QA pass required rewriting every 192.168.1.x reference to 192.168.7.1 to match firmware defaults.
+- **Surface credential workflow** – Every README/PRD that exposes a web portal must remind developers to copy the credential overlay template locally and never commit real SSIDs/passwords.
+- **Map hardware to UI** – List which buttons or LEDs power each UI element per board so reviewers can validate acceptance criteria without guessing.
 ```
 
 ## 📖 Complete Documentation

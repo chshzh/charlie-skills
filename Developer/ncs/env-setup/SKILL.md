@@ -152,6 +152,149 @@ command -v git-remote-https || echo "Missing git-remote-https. Current GIT_EXEC_
 
 Don't use `nrfutil sdk-manager … --shell` in automated terminals—it keeps the VS Code task busy after builds complete.
 
+## Development Environment Setup
+
+### Code Formatting with clang-format
+
+Configure VS Code to automatically format code using Zephyr's clang-format rules.
+
+**Add to VS Code settings** (`~/Library/Application Support/Code/User/settings.json` on macOS):
+
+```json
+{
+    "editor.rulers": [75,100],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "C_Cpp.clang_format_path": "/opt/nordic/ncs/toolchains/<BUNDLE_ID>/bin/clang-format",
+    "C_Cpp.clang_format_style": "file:<SDK_PATH>/zephyr/.clang-format",
+}
+```
+
+**Replace placeholders:**
+- `<BUNDLE_ID>`: Your toolchain bundle ID (e.g., `322ac893fe` for v3.2.x)
+- `<SDK_PATH>`: Your SDK path (e.g., `/opt/nordic/ncs/v3.2.1` or `/opt/nordic/ncs/main`)
+
+**Example for v3.2.1:**
+```json
+{
+    "C_Cpp.clang_format_path": "/opt/nordic/ncs/toolchains/322ac893fe/bin/clang-format",
+    "C_Cpp.clang_format_style": "file:/opt/nordic/ncs/v3.2.1/zephyr/.clang-format",
+}
+```
+
+**Important: Verify ColumnLimit in .clang-format**
+
+After copying Zephyr's `.clang-format` to your project root, verify that `ColumnLimit` is set to `80` (not `100`). Checkpatch enforces an 80-column limit, and mismatches will cause CI failures.
+
+```yaml
+# In .clang-format, ensure this line reads:
+ColumnLimit: 80
+```
+
+If you find `ColumnLimit: 100`, change it to `80` and commit the corrected `.clang-format` to your repository.
+
+**When clang-format and checkpatch disagree:**
+
+Zephyr’s `checkpatch.pl` is the authority. Some macros (for example `HTTP_RESOURCE_DEFINE`, `ZBUS_CHAN_DEFINE`) require braces on the same line, while the shared `.clang-format` prefers Linux-style line breaks. Wrap those regions so VS Code doesn’t reflow them:
+
+```c
+/* clang-format off */
+HTTP_RESOURCE_DEFINE(button_api_resource, webserver_service, "/api/buttons",
+	&button_api_detail);
+/* clang-format on */
+```
+
+Inside the off/on block you can keep the `checkpatch`-approved layout (same-line braces, wrapped strings, etc.) without fighting the formatter.
+
+### Speed Up Flashing: Disable Verification
+
+**Problem:** Verification during flashing adds significant time, especially for large binaries.
+
+**Solution:** Disable verification in the nrfutil runner.
+
+**Steps:**
+
+1. Navigate to the runner script in your SDK:
+   ```
+   <SDK_PATH>/zephyr/scripts/west_commands/runners/nrf_common.py
+   ```
+
+2. Find the `_op_program` method (around line 460)
+
+3. Change the verification option:
+   ```python
+   # Before:
+   'options': {'chip_erase_mode': erase, 'verify': 'VERIFY_READ'}
+   
+   # After:
+   'options': {'chip_erase_mode': erase, 'verify': 'VERIFY_NONE'}
+   ```
+
+**Example path for v3.2.1:**
+```
+/opt/nordic/ncs/v3.2.1/zephyr/scripts/west_commands/runners/nrf_common.py
+```
+
+**Note:** This change persists across flashing operations until you update/reinstall the SDK.
+
+### Git Pre-Push Hook for Code Quality
+
+Automatically validate code style and commit messages before pushing to prevent CI failures.
+
+**Setup:**
+
+1. **Create the pre-push hook** in your project:
+   ```bash
+   nano .git/hooks/pre-push
+   ```
+
+2. **Add this content** (from [Zephyr docs](https://docs.zephyrproject.org/latest/contribute/style/index.html)):
+   ```bash
+   #!/bin/sh
+   remote="$1"
+   url="$2"
+   
+   z40=0000000000000000000000000000000000000000
+   
+   echo "Run push hook"
+   
+   while read local_ref local_sha remote_ref remote_sha
+   do
+       args="$remote $url $local_ref $local_sha $remote_ref $remote_sha"
+       exec ${ZEPHYR_BASE}/scripts/series-push-hook.sh $args
+   done
+   
+   exit 0
+   ```
+
+3. **Make it executable:**
+   ```bash
+   chmod +x .git/hooks/pre-push
+   ```
+
+**What it checks:**
+- Code style validation using `checkpatch.pl`
+- Commit message format
+- Signed-off-by verification
+
+**Environment requirement:**
+
+Ensure `ZEPHYR_BASE` is set (automatically set when you source `zephyr-env.sh`):
+```bash
+export ZEPHYR_BASE=<SDK_PATH>/zephyr
+```
+
+**Testing the hook:**
+```bash
+# Make a test commit with sign-off
+git commit --signoff -m "test: Validate pre-push hook"
+
+# Push (hook will run automatically)
+git push
+```
+
+The hook will display "Run push hook" and any validation errors before allowing the push.
+
 ## Notes
 
 - **Toolchain** provides build tools (west, cmake, compilers) via bundle ID

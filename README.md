@@ -1,6 +1,6 @@
-# Claude Skills Repository
+# Charlie Skills Repository
 
-Personal collection of specialized Claude skills for development workflows.
+Personal collection of specialized skills for development workflows with Claude.
 
 ## 📦 Skills Overview
 
@@ -56,7 +56,7 @@ Checklists, report templates, and automation scripts for validating builds again
 
 ## 🚀 Usage
 
-Skills are designed to be referenced by Claude during conversations. Each skill provides:
+Skills are designed to be referenced during development conversations. Each skill provides:
 - Templates and configurations
 - Documentation and guides
 - Automation scripts
@@ -65,7 +65,7 @@ Skills are designed to be referenced by Claude during conversations. Each skill 
 ### Invocation Pattern
 
 - Declare the role, domain, and desired skill, for example: “As Developer of NCS, I want to do env-setup with NCS 3.2.1.”
-- Claude maps the role to the matching directory (Developer, ProductManager, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
+- The assistant maps the role to the matching directory (Developer, ProductManager, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
 - Mention additional context (board, SDK version, target feature) so the assistant pulls the relevant files within that subdirectory.
 
 ## 📁 Structure
@@ -117,8 +117,8 @@ Individual skills may reference or include:
 ## 👤 Author
 
 **Charlie Shao** ([@chshzh](https://github.com/chshzh))  
-Nordic Semiconductor - Olso, Norway
+Nordic Semiconductor - Oslo, Norway
 
 ## 📅 Last Updated
 
-February 2, 2026
+February 3, 2026

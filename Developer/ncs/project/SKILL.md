@@ -35,6 +35,42 @@ Update templates based on review findings for continuous improvement.
 
 ---
 
+## 🧩 Workspace Application Setup
+
+All customer-facing apps must be *workspace applications* so anyone can clone the repo and fetch the exact Nordic SDK revision in one command.
+
+1. **Add `west.yml` at the repo root** (pin `sdk-nrf` revision and import Zephyr):
+        ```yaml
+        manifest:
+               self:
+                      path: my_app
+               remotes:
+                      - name: ncs
+                             url-base: https://github.com/nrfconnect
+               projects:
+                      - name: nrf
+                             remote: ncs
+                             repo-path: sdk-nrf
+                             revision: v3.2.1
+                             import: true
+        ```
+2. **Document the workflow in README**:
+        ```bash
+        west init -l my_app
+        west update -o=--depth=1 -n
+        west build -p -b nrf7002dk/nrf5340/cpuapp
+        ```
+3. **CI/CD requirement** – add `.github/workflows/build.yml` that:
+        - parses the NCS version from `west.yml`
+        - runs `west init/update` inside the GitHub-hosted container `ghcr.io/nrfconnect/sdk-nrf-toolchain:${NCS_VERSION}`
+        - executes format/static checks (`checkpatch`, `clang-format --dry-run`)
+        - builds every supported configuration (matrix strategy)
+        - uploads merged HEX artifacts for releases
+
+Use `nordic_wifi_opus_audio_demo/.github/workflows/build.yml` as the reference implementation.
+
+---
+
 ## 📋 Quick Command Reference
 
 ### Generate New Project
@@ -307,6 +343,7 @@ cat PRD.md  # Should reflect actual implementation
 - [ ] No hardcoded credentials in code
 - [ ] No passwords in configuration files
 - [ ] Credential overlays in .gitignore
+- [ ] Track only `overlay-*-credentials.conf.template` files – real credential overlays stay local
 - [ ] No private keys committed
 - [ ] No API tokens in code
 
@@ -329,6 +366,14 @@ cat PRD.md  # Should reflect actual implementation
 6. **Handle all network events** - Connect/disconnect/IP assigned
 7. **Update PRD as you build** - Keep PRD.md current with changes
 8. **Test early and often** - Build + hardware testing
+
+## 🧪 Lessons from SoftAP Webserver QA
+
+- **Document the actual SoftAP network** – Standardize on the `192.168.7.0/24` subnet with the gateway at `192.168.7.1`, and mirror those values across README Quick Start tables, PRD test cases, and troubleshooting guides so users never see stale `192.168.1.x` examples again.
+- **Ship credential overlays, not secrets** – Check in `overlay-wifi-credentials.conf.template` (or equivalent) and `.gitignore` the developer-specific overlay. Every README needs a note that developers must copy the template locally and keep passwords out of logs, configs, and commits.
+- **Describe per-board capabilities** – When a design supports multiple DKs, PRD.md and README.md must include button/LED tables that match each board’s silkscreen so QA can validate acceptance criteria without guessing.
+- **Keep automation green** – Treat `ProductManager/ncs/review/check_project.sh` as a release gate. Fix the script as soon as it drifts (missing tools, path errors, etc.) before starting manual QA work.
+- **Plan for Wi-Fi recovery** – SoftAP enable can fail after power events. Build a retry/back-off path into SMF/zbus states (and document it in requirements) so the system self-recovers instead of leaving QA to cycle power manually.
 
 ### For Reviewers
 1. **Verify PRD.md exists** - Must be present and complete

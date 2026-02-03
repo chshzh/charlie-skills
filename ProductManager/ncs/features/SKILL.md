@@ -15,6 +15,25 @@ Modular feature overlays for Nordic NCS projects - choose any combination of 12 
 - **Wi-Fi Shell**: Interactive commands for development/debugging
 - Wi-Fi STA, SoftAP, P2P: (See [Developer Wi-Fi skill](../../../Developer/ncs/project/wifi/SKILL.md))
 
+## 🧭 Workspace Application Readiness
+
+Product-level apps must follow the [NCS workspace application](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/app_dev/create_application.html#workspace_application) pattern so teams can reproduce the environment quickly.
+
+- ✅ **west.yml** in the repo root that pins `sdk-nrf` (and other dependencies) to the approved revision (e.g., `v3.2.1`).
+- ✅ **README “Workspace setup” section** that shows: `west init -l <app>` → `west update -o=--depth=1 -n` → `west build ...`.
+- ✅ **Automation**: GitHub Actions (or Azure DevOps) that (1) parse the manifest revision, (2) run format/static checks, and (3) build all customer-facing firmware images.
+- ✅ **Release gates**: PRs must stay red until format + build jobs succeed.
+
+When reviewing PRDs or QA reports, verify these four items exist; otherwise the project is not “release ready” even if features compile locally.
+
+## 🧪 Lessons from SoftAP Webserver QA
+
+- **Lock down networking facts** – PRD.md, README.md, QA_REPORT.md, and REST samples must all cite the same SoftAP subnet (`192.168.7.0/24` with gateway `192.168.7.1`). Any drift confuses testers and customers.
+- **Template credentials** – Require an `overlay-wifi-credentials.conf.template` (or similar) in every Wi-Fi project, documented in Quick Start instructions, with the real overlay `.gitignored`. Reject PRs that log or commit passwords.
+- **Per-board capability matrices** – Capture button/LED counts per development kit directly in PRD acceptance criteria so QA can score features accurately when firmware targets multiple boards.
+- **Automation is a gate** – Treat `ProductManager/ncs/review/check_project.sh` as blocking. Feature work pauses until the script runs clean, otherwise every QA cycle repeats the same manual findings.
+- **Plan resiliency features** – Add backlog items (and acceptance tests) for Wi-Fi retry/back-off behavior when enabling SoftAP fails so the roadmap reflects real-world reliability gaps.
+
 ### Network Protocols
 - MQTT, HTTP Client, HTTPS Server, CoAP, UDP, TCP  
   (See [Developer protocols skill](../../../Developer/ncs/project/protocols/SKILL.md))
