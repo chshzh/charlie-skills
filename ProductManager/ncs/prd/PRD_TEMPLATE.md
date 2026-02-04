@@ -513,29 +513,41 @@ west build -p -b board_name
 
 #### 7.1.2 Test Cases
 
-#### TC-001: [Test Case Name]
+#### TC-001: Wi-Fi Reconnection after Router Power Cycle (Real-life Scenario)
 
-**Objective**: What is being tested
+**Objective**: Verify device robustly handles router power loss and automatically reconnects when service returns.
 
 **Prerequisites**:
-- Precondition 1
-- Precondition 2
+- Device connected to Test Router (AP)
+- Serial logging enabled for monitoring
+- Router power strip accessible
 
 **Test Steps**:
-1. Step 1
-2. Step 2
-3. Step 3
+1. Confirm device is connected to AP and IP address is assigned.
+2. Unplug power source of the Test Router (simulate power outage).
+3. Observe device logs for disconnection event (e.g., `WIFI_EVENT_DISCONNECTED`).
+4. Wait for 5 minutes (keep router off). Verify device enters reconnection backoff loop.
+   - *Requirement*: Device should NOT panic or crash.
+   - *Requirement*: Reconnection attempts should retry at intervals (e.g., every 3 minutes) to conserve power/bandwidth, rather than rigid continuous looping.
+5. Plug Test Router power back in.
+6. Wait for Router to boot (approx. 1-2 mins).
+7. Observe device automatically reconnecting once beacon is detected.
 
 **Expected Results**:
-- Expected outcome 1
-- Expected outcome 2
+- Device detects disconnection within X seconds.
+- Device enters robust reconnection state machine without crashing.
+- Device successfully reconnects and obtains IP address after router comes back online.
 
 **Actual Results**:
 - [To be filled during testing]
 
 **Status**: [Pass / Fail / Not Tested]
 
-**Notes**: Additional observations
+**Notes**: Test with multiple router brands (TP-Link, Asus, Netgear) if possible to verify behavior with different beacon startup timings.
+
+#### TC-002: [Test Case Name]
+
+**Objective**: What is being tested
 
 #### 7.1.3 Test Results Summary
 

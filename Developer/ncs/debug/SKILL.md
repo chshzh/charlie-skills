@@ -15,12 +15,22 @@ description: Debug Nordic nRF Connect SDK (NCS) applications using GDB, RTT logg
 
 ## Critical Rules
 
-1. **Always ensure NCS environment is set up** before debugging (use ncs-env-setup skill)
-2. **Verify debugger connection** to the target device before starting debug session
-3. **Check logging backend configuration** in prj.conf
+1. **Always Collect Environmental Baseline**: Request Device HW, NCS Version, Firmware/Software Versions, Router Brand/Version before starting.
+2. **Always ensure NCS environment is set up** before debugging (use ncs-env-setup skill)
+3. **Verify debugger connection** to the target device before starting debug session
+4. **Check logging backend configuration** in prj.conf
 
 ## Workflow for Debugging
+0: Information Gathering (Mandatory)
 
+Before investigating, explicitly request and document:
+- **Device HW**: Board name/version (e.g., nRF7002DK PCA10143 v1.0.1)
+- **NCS Version**: SDK version tag (e.g., v2.9.0, v3.2.1)
+- **Firmware Version**: Application version or git commit hash
+- **Router Details**: Brand, Model, Firmware Version (critical for Wi-Fi issues)
+- **Logs**: Relevant logs (boot sequence, error messages, crash dumps)
+
+### Step 
 ### Step 1: Verify Build Configuration
 
 Check that the project is built with debug symbols:
