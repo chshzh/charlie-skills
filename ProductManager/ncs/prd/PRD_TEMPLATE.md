@@ -206,7 +206,7 @@ west build -p -b <board_name> -- \
 
 | ID | User Story | Acceptance Criteria | Related Feature |
 |----|------------|---------------------|-----------------||
-| FR-001 | As a user, I want to [action] so that [benefit] | - Criteria 1<br>- Criteria 2 | [Feature] |
+| FR-001 | As a developer/user, I want to see comprehensive startup information when the device boots so that I can verify the device identity, configuration, and version | - Product name and version displayed<br>- Build date and time shown<br>- Board name in human-readable format (e.g., "nRF7002DK" not "nrf7002dk")<br>- MAC address in formatted notation (e.g., "F4:CE:36:00:8B:E9")<br>- NCS/SDK version displayed<br>- Firmware version shown<br>- Memory usage statistics (optional but recommended) | Logging, System Info |
 | FR-002 | As a user, I want to [action] so that [benefit] | - Criteria 1<br>- Criteria 2 | [Feature] |
 
 **Should Have (P1)**
@@ -222,6 +222,83 @@ west build -p -b <board_name> -- \
 | FR-201 | As a user, I want to [action] so that [benefit] | - Criteria 1<br>- Criteria 2 | [Feature] |
 
 ### 2.3 Non-Functional Requirements
+
+#### System Information Display
+
+**Startup Banner Requirements**:
+
+All production-ready NCS applications must display comprehensive system information at startup for debugging, support, and version tracking purposes.
+
+**Minimum Required Information**:
+
+```
+[00:00:00.332,214] <inf> main: ==============================================
+[00:00:00.332,214] <inf> main: [Product Name]
+[00:00:00.332,244] <inf> main: ==============================================
+[00:00:00.332,275] <inf> main: Build: Feb  4 2026 10:39:11
+[00:00:00.332,275] <inf> main: Board: nRF7002DK
+[00:00:00.332,305] <inf> main: MAC: F4:CE:36:00:8B:E9
+[00:00:00.332,305] <inf> main: ==============================================
+```
+
+**Recommended Additional Information**:
+
+```
+[00:00:00.332,305] <inf> main: Version: 1.2.0
+[00:00:00.332,336] <inf> main: NCS: v3.2.1
+[00:00:00.332,336] <inf> main: Zephyr: 3.8.0
+[00:00:00.332,366] <inf> main: Flash: 256KB (128KB used, 50%)
+[00:00:00.332,366] <inf> main: RAM: 128KB (64KB used, 50%)
+[00:00:00.332,397] <inf> main: Heap: 32KB available
+[00:00:00.332,397] <inf> main: ==============================================
+```
+
+**Implementation Guidance**:
+
+1. **Board Name Conversion**: Display human-readable board names
+   ```c
+   // Convert CONFIG_BOARD to proper capitalization
+   if (strstr(CONFIG_BOARD, "nrf7002dk")) {
+       board_name = "nRF7002DK";
+   } else if (strstr(CONFIG_BOARD, "nrf54lm20dk")) {
+       board_name = "nRF54LM20DK";
+   }
+   ```
+
+2. **MAC Address Retrieval**: Use Zephyr network interface API
+   ```c
+   struct net_if *iface = net_if_get_default();
+   struct net_linkaddr *mac_addr = net_if_get_link_addr(iface);
+   if (mac_addr && mac_addr->len == 6) {
+       LOG_INF("MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+           mac_addr->addr[0], mac_addr->addr[1], mac_addr->addr[2],
+           mac_addr->addr[3], mac_addr->addr[4], mac_addr->addr[5]);
+   }
+   ```
+
+3. **Build Information**: Use compiler macros
+   ```c
+   LOG_INF("Build: %s %s", __DATE__, __TIME__);
+   ```
+
+4. **Version Information**: Define in Kconfig or header
+   ```c
+   LOG_INF("Version: %s", CONFIG_APP_VERSION);
+   LOG_INF("NCS: %s", CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION);
+   ```
+
+**Formatting Requirements**:
+- Use separators (e.g., `=====`) for visual clarity
+- MAC address must use uppercase hex with colon separators (XX:XX:XX:XX:XX:XX)
+- Board names must be properly capitalized (nRF7002DK, not nrf7002dk)
+- Date format: MMM DD YYYY HH:MM:SS
+- All information must be readable from serial logs for remote debugging
+
+**Benefits**:
+- Quick identification of device and firmware version in logs
+- Essential for customer support and bug reports
+- Enables remote debugging without physical access
+- Facilitates QA testing and version tracking
 
 #### Performance
 - **Metric 1**: Specification (e.g., latency < 10ms)
@@ -545,7 +622,75 @@ west build -p -b board_name
 
 **Notes**: Test with multiple router brands (TP-Link, Asus, Netgear) if possible to verify behavior with different beacon startup timings.
 
-#### TC-002: [Test Case Name]
+#### TC-002: Startup Information Display Verification
+
+**Objective**: Verify that all required system information is displayed correctly at device startup.
+
+**Prerequisites**:
+- Device flashed with firmware
+- Serial console connected and logging enabled
+- Test executed on all supported board variants
+
+**Test Steps**:
+1. Power on or reset the device
+2. Capture serial output from boot sequence
+3. Verify presence of all required information fields
+4. Verify format compliance for each field
+
+**Expected Results**:
+
+**Required Fields (Must Have)**:
+- ✅ Product name displayed
+- ✅ Build date and time in format: `MMM DD YYYY HH:MM:SS`
+- ✅ Board name in proper case (e.g., "nRF7002DK", "nRF54LM20DK")
+- ✅ MAC address in format: `XX:XX:XX:XX:XX:XX` (uppercase hex, colon-separated)
+
+**Recommended Fields (Should Have)**:
+- ✅ Firmware/application version
+- ✅ NCS version
+- ✅ Zephyr version
+- ✅ Memory usage statistics (Flash, RAM, Heap)
+
+**Format Validation**:
+- Visual separators present (e.g., `=====`)
+- Log timestamps present
+- Log level indicators present (e.g., `<inf>`)
+- Text alignment consistent
+- No truncated or corrupted information
+
+**Example Valid Output**:
+```
+[00:00:00.332,214] <inf> main: ==============================================
+[00:00:00.332,214] <inf> main: Nordic WiFi SoftAP Webserver
+[00:00:00.332,244] <inf> main: ==============================================
+[00:00:00.332,275] <inf> main: Build: Feb  4 2026 10:39:11
+[00:00:00.332,275] <inf> main: Board: nRF7002DK
+[00:00:00.332,305] <inf> main: MAC: F4:CE:36:00:8B:E9
+[00:00:00.332,305] <inf> main: Version: 1.0.0
+[00:00:00.332,336] <inf> main: NCS: v3.2.1
+[00:00:00.332,366] <inf> main: ==============================================
+```
+
+**Validation Criteria**:
+| Field | Validation | Status |
+|-------|------------|--------|
+| Product Name | Matches expected name | [ ] |
+| Build Date | Valid date format, matches build | [ ] |
+| Board Name | Proper capitalization | [ ] |
+| MAC Address | 6 octets, uppercase, colon-separated | [ ] |
+| Version | Matches tagged version | [ ] |
+
+**Actual Results**:
+- [To be filled during testing]
+
+**Status**: [Pass / Fail / Not Tested]
+
+**Notes**: 
+- Test on multiple boards to verify board name detection
+- MAC address should be unique per device
+- Version information should match git tags or build metadata
+
+#### TC-003: [Test Case Name]
 
 **Objective**: What is being tested
 
