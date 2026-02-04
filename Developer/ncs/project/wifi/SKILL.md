@@ -42,6 +42,13 @@ cp ~/.claude/skills/Developer/ncs/project/wifi/configs/wifi-raw.conf .
   - Best practices
   - Troubleshooting
 
+- **[RECONNECTION_PATTERNS.md](wifi/guides/RECONNECTION_PATTERNS.md)**: Network reconnection best practices
+  - WiFi auto-reconnect after router power cycle
+  - Network stack stabilization delays
+  - Application protocol state management (MQTT, HTTPS)
+  - Idempotent network notifications
+  - Complete integration examples
+
 ## ⚙️ Configuration Files
 
 Located in `wifi/configs/`:

@@ -81,6 +81,11 @@ cp ~/.claude/skills/ProductManager/ncs/features/overlays/overlay-udp.conf .
 Each protocol has detailed documentation in:
 - `ProductManager/ncs/features/FEATURE_SELECTION.md` - Configuration and code examples
 - `protocols/<protocol>/` - Protocol-specific guides (when available)
+- **[RECONNECTION_PATTERNS.md](../wifi/guides/RECONNECTION_PATTERNS.md)** - Network state management
+  - Application protocol reconnection (MQTT, HTTPS)
+  - State machine patterns
+  - Stabilization delays and retry logic
+  - Handling WiFi disconnect/reconnect events
 
 ## 🚀 Usage
 

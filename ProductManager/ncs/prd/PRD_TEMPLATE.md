@@ -592,35 +592,92 @@ west build -p -b board_name
 
 #### TC-001: Wi-Fi Reconnection after Router Power Cycle (Real-life Scenario)
 
-**Objective**: Verify device robustly handles router power loss and automatically reconnects when service returns.
+**Objective**: Verify device robustly handles router power loss and automatically reconnects when service returns, with full application protocol recovery.
 
 **Prerequisites**:
-- Device connected to Test Router (AP)
-- Serial logging enabled for monitoring
+- Device connected to Test Router (AP) and all services operational
+- Serial logging enabled for monitoring (INFO level minimum)
 - Router power strip accessible
+- MQTT/HTTPS/OTA or other network services configured and running
 
 **Test Steps**:
-1. Confirm device is connected to AP and IP address is assigned.
-2. Unplug power source of the Test Router (simulate power outage).
-3. Observe device logs for disconnection event (e.g., `WIFI_EVENT_DISCONNECTED`).
-4. Wait for 5 minutes (keep router off). Verify device enters reconnection backoff loop.
-   - *Requirement*: Device should NOT panic or crash.
-   - *Requirement*: Reconnection attempts should retry at intervals (e.g., every 3 minutes) to conserve power/bandwidth, rather than rigid continuous looping.
-5. Plug Test Router power back in.
-6. Wait for Router to boot (approx. 1-2 mins).
-7. Observe device automatically reconnecting once beacon is detected.
+1. Confirm device is connected to AP and IP address is assigned
+2. Verify all network services operational (check logs for MQTT publish, HTTPS requests, etc.)
+3. Unplug power source of the Test Router (simulate power outage)
+4. Observe device logs for disconnection event (`NET_EVENT_WIFI_DISCONNECT_RESULT`)
+5. Wait 90 seconds with router powered off
+   - Verify device logs periodic reconnection attempts every 30 seconds
+   - Verify device does NOT panic, crash, or exhaust resources
+   - Verify reconnection logic checks WiFi state before attempting connection
+6. Plug Test Router power back in
+7. Wait for router to fully boot (approx. 60-90 seconds including beacon startup)
+8. Observe device automatically reconnecting once AP is available
+9. Verify full service restoration:
+   - WiFi association and WPA key negotiation
+   - IP address assignment via DHCP
+   - DNS resolver functional
+   - MQTT client reconnects and resumes publishing
+   - HTTPS client resumes requests
+   - Metrics/OTA services operational
 
 **Expected Results**:
-- Device detects disconnection within X seconds.
-- Device enters robust reconnection state machine without crashing.
-- Device successfully reconnects and obtains IP address after router comes back online.
+
+**WiFi Layer**:
+- ✅ Device detects disconnection within 10 seconds
+- ✅ Device logs reconnection attempts every 30 seconds: "WiFi still disconnected, retrying in 30 seconds"
+- ✅ Device checks current WiFi state before each reconnection attempt
+- ✅ Device successfully reconnects within 60 seconds of router beacon availability
+- ✅ Connection uses stored credentials (no user intervention required)
+
+**Network Stack**:
+- ✅ IP address assigned via DHCP within 10 seconds of WiFi association
+- ✅ NET_EVENT_L4_CONNECTED fires when IP is assigned
+- ✅ DNS resolver functional (tested via subsequent protocol operations)
+
+**Application Protocols**:
+- ✅ MQTT client waits 15-20 seconds after L4_CONNECTED before attempting connection
+- ✅ MQTT client connects to broker within 30 seconds of WiFi reconnect
+- ✅ MQTT resumes publishing without errors
+- ✅ HTTPS client waits 3-5 seconds after L4_CONNECTED before making requests
+- ✅ HTTPS requests succeed without DNS failures (error -11)
+- ✅ No socket errors (-128, -113) during reconnection sequence
+
+**System Health**:
+- ✅ No device reboot required
+- ✅ No manual intervention (button press, app control) required
+- ✅ No memory leaks or resource exhaustion during reconnect cycles
+- ✅ All metrics and status indicators update correctly post-reconnection
+
+**Timing Requirements**:
+- WiFi disconnect detection: < 10 seconds
+- WiFi reconnect (after router available): < 60 seconds
+- MQTT reconnection: < 30 seconds after WiFi reconnect
+- HTTPS recovery: < 15 seconds after WiFi reconnect
+- **Total recovery time**: < 2 minutes from router power-on to full service restoration
+
+**Acceptance Criteria**:
+- Zero manual interventions required for full recovery
+- All network services operational and error-free post-reconnection
+- Reconnection logic resilient to multiple power cycle events
+- Clean logs with no unnecessary errors during normal reconnection flow
 
 **Actual Results**:
 - [To be filled during testing]
 
 **Status**: [Pass / Fail / Not Tested]
 
-**Notes**: Test with multiple router brands (TP-Link, Asus, Netgear) if possible to verify behavior with different beacon startup timings.
+**Notes**: 
+- Test with multiple router brands (TP-Link, Asus, Netgear, UniFi) to verify behavior with different beacon startup timings
+- Repeat test 3-5 times to verify consistency
+- Monitor for memory growth over multiple reconnect cycles
+- See [RECONNECTION_PATTERNS.md](../../../Developer/ncs/project/wifi/guides/RECONNECTION_PATTERNS.md) for implementation details
+
+**Related Requirements**: 
+- FR-XXX (Network Resilience)
+- FR-XXX (Automatic Recovery)
+- FR-XXX (Application Protocol State Management)
+
+**Priority**: P0 (Critical) - Real-world reliability essential for production deployment
 
 #### TC-002: Startup Information Display Verification
 
@@ -690,7 +747,150 @@ west build -p -b board_name
 - MAC address should be unique per device
 - Version information should match git tags or build metadata
 
-#### TC-003: [Test Case Name]
+---
+
+#### TC-003: Application Protocol State Management
+
+**Objective**: Verify proper state machine handling for MQTT/HTTPS/WebSocket clients during network transitions.
+
+**Prerequisites**:
+- Device running with MQTT and/or HTTPS client enabled
+- WiFi connected and network operational
+- Logging level set to INFO or DEBUG
+- Serial console connected
+
+**Test Steps**:
+1. Monitor logs during initial boot and connection
+2. Record time from "Network connectivity established" to first successful MQTT/HTTPS operation
+3. Verify no failed connection attempts with error codes -128, -113, -11 during normal startup
+4. Trigger WiFi disconnect (router reboot or `wifi disconnect` shell command)
+5. Verify application protocols detect disconnection and stop operations
+6. Restore WiFi connection
+7. Verify application protocols wait for network stabilization before reconnecting
+8. Monitor for proper sequence: WiFi connect → L4 connect → stabilization delay → protocol connect
+
+**Expected Results**:
+- ✅ First MQTT/HTTPS operation occurs 15-25 seconds after "Network connectivity established" (stabilization period)
+- ✅ No DNS lookup failures (error -11) during initial connection
+- ✅ No socket close (-128) or host unreachable (-113) errors during normal startup
+- ✅ No rapid retry loops (>1 attempt per 5 seconds during startup)
+- ✅ States transition correctly: DISCONNECTED → CONNECTING → CONNECTED
+- ✅ Protocol clients only attempt operations when in CONNECTED state
+- ✅ On WiFi disconnect, protocols immediately stop and return to DISCONNECTED state
+- ✅ On WiFi reconnect, protocols wait appropriate stabilization period before reconnecting
+- ✅ Logs show "Network not ready" or "Not connected" warnings instead of silent failures
+
+**Acceptance Criteria**:
+- Zero DNS/connection failures during normal startup sequence
+- All publish/request operations succeed when device reports "connected"
+- State transitions are logged and observable
+- No operations attempted while network_ready == false
+- Progressive retry logic visible: 3 quick retries (5s) then longer backoff (60s)
+
+**Actual Results**:
+- [To be filled during testing]
+
+**Status**: [Pass / Fail / Not Tested]
+
+**Notes**: See [RECONNECTION_PATTERNS.md](../../../Developer/ncs/project/wifi/guides/RECONNECTION_PATTERNS.md) for implementation patterns.
+
+---
+
+#### TC-004: Network Stabilization Delays
+
+**Objective**: Verify appropriate delays prevent transient startup failures in application protocols.
+
+**Prerequisites**:
+- Device configured with MQTT, HTTPS, or other IP-based protocols
+- Clean flash with no prior network state
+- Serial logging enabled at INFO level
+
+**Test Steps**:
+1. Flash device and boot with WiFi credentials provisioned
+2. Monitor logs from boot through first successful MQTT/HTTPS operation
+3. Check for any DNS failures (error -11, "getaddrinfo() failed")
+4. Check for socket errors (-128, -113)
+5. Record timestamp of each event:
+   - WiFi connected (WPA key negotiation complete)
+   - L4 connected (IP assigned via DHCP)
+   - First MQTT/HTTPS connection attempt
+   - First successful MQTT/HTTPS operation
+6. Verify stabilization delays are applied:
+   - HTTPS: 3-5 seconds after L4 connect
+   - MQTT: 15-20 seconds after L4 connect
+
+**Expected Results**:
+- ✅ HTTPS client waits ≥3 seconds after L4_CONNECTED before first request
+- ✅ MQTT client waits ≥15 seconds after L4_CONNECTED before first connect attempt
+- ✅ Zero DNS failures during initial connection sequence
+- ✅ Zero -128 (socket close) or -113 (host unreachable) errors during normal startup
+- ✅ Progressive retry logic visible: 3 quick retries (5s intervals) then longer backoff (60s)
+- ✅ State re-verified after each delay (network may have dropped during wait)
+
+**Timing Validation**:
+```
+[00:00:07.626] WiFi: CTRL-EVENT-CONNECTED
+[00:00:11.505] L4: Network connectivity established
+[00:00:14.565] HTTPS: Looking up example.com         ← 3s delay ✓
+[00:00:27.685] MQTT: Connecting to broker            ← 16s delay ✓
+```
+
+**Acceptance Criteria**:
+- Clean startup with no transient network errors in logs
+- Delays are configurable via Kconfig
+- All DNS lookups succeed on first attempt during normal operation
+- Application threads verify `network_ready` flag after stabilization delays
+
+**Actual Results**:
+- [To be filled during testing]
+
+**Status**: [Pass / Fail / Not Tested]
+
+**Notes**: Stabilization delays may need adjustment for different network conditions (cellular, mesh, satellite).
+
+---
+
+#### TC-005: Idempotent Network Notifications
+
+**Objective**: Verify network state notifications are safe to call multiple times without side effects.
+
+**Prerequisites**:
+- Device with multiple network-dependent modules (MQTT, HTTPS, OTA, etc.)
+- Logging enabled at DEBUG level
+- Ability to trigger rapid connect/disconnect cycles
+
+**Test Steps**:
+1. Monitor logs during boot
+2. Count "Network connected, notifying X client" messages for each client
+3. Verify each client receives exactly one notification per connection event
+4. Trigger rapid WiFi disconnect/reconnect (e.g., via shell commands)
+5. Verify clients don't receive duplicate notifications
+6. Check semaphore state doesn't overflow/underflow
+7. Verify "Already marked as ready, skipping duplicate" debug messages when appropriate
+
+**Expected Results**:
+- ✅ Each client receives exactly one connect notification per network-up event
+- ✅ Duplicate calls log at DEBUG level: "Already marked as ready, skipping duplicate"
+- ✅ No semaphore errors or thread hangs
+- ✅ All clients properly transition to disconnected state on network-down event
+- ✅ Disconnect handlers clean up resources (close sockets, reset state machines)
+
+**Acceptance Criteria**:
+- notify_connected() is idempotent (safe to call multiple times)
+- notify_disconnected() is idempotent
+- State flags prevent duplicate semaphore signals
+- All clients handle state transitions correctly
+
+**Actual Results**:
+- [To be filled during testing]
+
+**Status**: [Pass / Fail / Not Tested]
+
+**Notes**: Critical for systems where multiple network events fire during startup or reconnection.
+
+---
+
+#### TC-006: [Test Case Name]
 
 **Objective**: What is being tested
 
