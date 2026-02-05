@@ -56,6 +56,10 @@ Quick reference checklist for conducting NCS project reviews.
 ### Configuration (30 min)
 - [ ] Wi-Fi configs appropriate (if applicable)
 - [ ] Memory settings sufficient
+  - [ ] Stack sizes optimized using Thread Analyzer
+  - [ ] Heap size adequate for subsystems (≥64 KB for Wi-Fi apps)
+  - [ ] Heap monitoring enabled during development
+  - [ ] Net buffer pools sized appropriately
 - [ ] Network stack configured
 - [ ] Overlay files proper
 - [ ] Board configs complete
@@ -81,12 +85,33 @@ Quick reference checklist for conducting NCS project reviews.
 
 ### All Standard Review Items Plus:
 
+### Memory Optimization (REQUIRED)
+- [ ] Thread stacks sized from Thread Analyzer data
+  - [ ] CONFIG_THREAD_ANALYZER enabled during development
+  - [ ] High-water marks documented
+  - [ ] Appropriate margins applied (1.2-2.0x based on thread type)
+  - [ ] Stack configurations include sizing rationale in comments
+- [ ] Heap properly configured
+  - [ ] Wi-Fi apps: CONFIG_HEAP_MEM_POOL_SIZE ≥ 64 KB (80 KB recommended)
+  - [ ] Heap monitoring module integrated (development builds)
+  - [ ] Peak heap usage tested under load
+  - [ ] Heap size justified and documented
+- [ ] Memory architecture documented
+  - [ ] System heap vs dedicated pools explained
+  - [ ] Net buffer slab sizing rationale provided
+  - [ ] Wi-Fi driver heap strategy documented (global vs dedicated)
+- [ ] Memory debugging enabled in development
+  - [ ] CONFIG_STACK_SENTINEL=y
+  - [ ] CONFIG_SYS_HEAP_RUNTIME_STATS=y
+  - [ ] Heap/stack monitors active
+
 ### Wi-Fi Implementation (if applicable)
 - [ ] Mode-specific implementation correct
 - [ ] Event handling complete
 - [ ] Connection retry logic
 - [ ] Performance optimizations
 - [ ] Low power configured
+- [ ] Memory requirements met (see Memory Optimization above)
 
 ### Security Audit
 - [ ] Credential management secure
@@ -182,9 +207,12 @@ Quick reference checklist for conducting NCS project reviews.
 - ⚠️  No constraints → Add ranges for numeric options
 
 ### prj.conf
-- ❌ Insufficient heap for Wi-Fi → Increase to ≥80KB
+- ❌ Insufficient heap for Wi-Fi → Increase to ≥64 KB (80 KB recommended)
+- ❌ Thread stacks not sized from analyzer → Use Thread Analyzer data
+- ❌ No heap monitoring → Add heap_monitor module (use ncs-mem skill)
 - ⚠️  Debug in production → Use overlay for debug configs
 - ⚠️  Missing dependencies → Enable required subsystems
+- ⚠️  CONFIG_HEAP_MEM_POOL_IGNORE_MIN=y on Wi-Fi apps → Remove, use auto-minimum
 
 ### Code
 - ❌ No error handling → Check all return values
@@ -201,14 +229,26 @@ Quick reference checklist for conducting NCS project reviews.
 ### Wi-Fi
 - ❌ Low power not configured → Disable for dev, enable for production
 - ❌ No event handling → Handle connect/disconnect/IP events
-- ⚠️  Memory insufficient → Increase heap/buffers
+- ❌ Heap < 64 KB → Increase CONFIG_HEAP_MEM_POOL_SIZE to ≥80000
+- ❌ No heap monitoring → Add heap_monitor module
+- ⚠️  Net buffers undersized → Tune CONFIG_NET_BUF_RX/TX_COUNT
 - ⚠️  No retry logic → Add connection retry
+- ⚠️  Wi-Fi driver using global heap unnecessarily → Keep dedicated heap unless constrained
 
 ### Security
 - ❌ Hardcoded credentials → Never commit credentials
 - ❌ No encryption → Use WPA2/WPA3
 - ⚠️  No TLS → Enable for sensitive data
 - ⚠️  Debug enabled → Remove from release builds
+
+### Memory Optimization
+- ❌ Stacks not sized from analyzer → Run Thread Analyzer, apply margins
+- ❌ Wi-Fi heap < 64 KB → Critical: increase to ≥80 KB for WPA supplicant
+- ❌ No heap monitoring → Add heap_monitor module from ncs-mem skill
+- ❌ BUILD_ASSERT missing for heap floor → Add build-time validation
+- ⚠️  Heap too large → Right-size from peak usage + margin
+- ⚠️  No memory architecture docs → Document heap strategy
+- ⚠️  Net buffers in heap → Keep dedicated slab pools for determinism
 
 ---
 
