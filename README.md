@@ -6,104 +6,110 @@ Personal collection of specialized skills for development workflows with Claude.
 
 ### Developer Skills
 
-#### **NCS Env Setup**
-Environment provisioning scripts and notes for Nordic SDK tooling.
-- Location: `Developer/ncs/env-setup/`
-- Entry: [SKILL.md](Developer/ncs/env-setup/SKILL.md)
+#### `chsh-dev-commit` — Git Commit Workflow
+Plan, group, and execute git commits following Conventional Commits style.
+- Entry: [SKILL.md](chsh-dev-commit/SKILL.md)
 
-#### **NCS Debug**
-Debugging tips, CLI references, and troubleshooting playbooks.
-- Location: `Developer/ncs/debug/`
-- Entry: [SKILL.md](Developer/ncs/debug/SKILL.md)
+#### `chsh-dev-mem-opt` — NCS Memory Optimization
+Strategies for footprint reduction and heap profiling in NCS/Zephyr projects.
+- Entry: [SKILL.md](chsh-dev-mem-opt/SKILL.md)
 
-#### **NCS Memory Optimization**
-Strategies for footprint reduction and profiling.
-- Location: `Developer/ncs/mem-opt/`
-- Entry: [SKILL.md](Developer/ncs/mem-opt/SKILL.md)
-
-#### **NCS Project Workflow**
-Complete lifecycle management for NCS projects with integrated generate→review→improve workflow.
-- Location: `Developer/ncs/project/`
+#### `chsh-dev-project` — NCS Project Workflow
+Complete lifecycle management: generate → develop → review → improve.
+Includes sub-skills for debug, env-setup, architecture patterns, protocols, and Wi-Fi.
+- Entry: [SKILL.md](chsh-dev-project/SKILL.md)
 - Quick start:
-	- `cp ~/.claude/skills/Developer/ncs/project/templates/.gitignore ./`
-	- `cp ~/.claude/skills/Developer/ncs/project/templates/LICENSE ./`
-	- `cp ~/.claude/skills/Developer/ncs/project/templates/README_TEMPLATE.md README.md`
-	- `cp ~/.claude/skills/Developer/ncs/project/configs/wifi-sta.conf overlay-wifi.conf`
-- Documentation:
-	- [SKILL.md](Developer/ncs/project/SKILL.md)
-	- [PROJECT_STRUCTURE.md](Developer/ncs/project/guides/PROJECT_STRUCTURE.md)
-	- [WIFI_GUIDE.md](Developer/ncs/project/guides/WIFI_GUIDE.md)
+	- `cp ~/.claude/skills/chsh-dev-project/templates/.gitignore ./`
+	- `cp ~/.claude/skills/chsh-dev-project/templates/LICENSE ./`
+	- `cp ~/.claude/skills/chsh-dev-project/templates/README_TEMPLATE.md README.md`
+	- `cp ~/.claude/skills/chsh-dev-project/wifi/configs/wifi-sta.conf overlay-wifi.conf`
+- Sub-skills:
+	- [debug/SKILL.md](chsh-dev-project/debug/SKILL.md) — debugging, RTT, GDB
+	- [env-setup/SKILL.md](chsh-dev-project/env-setup/SKILL.md) — toolchain & west setup
+	- [architecture/SKILL.md](chsh-dev-project/architecture/SKILL.md) — SMF+zbus vs multi-threaded patterns
+	- [protocols/SKILL.md](chsh-dev-project/protocols/SKILL.md) — MQTT, CoAP, HTTP, TCP/UDP
+	- [protocols/webserver/SKILL.md](chsh-dev-project/protocols/webserver/SKILL.md) — static HTTP server
+	- [wifi/SKILL.md](chsh-dev-project/wifi/SKILL.md) — STA, SoftAP, P2P modes
 
 ### Product Manager Skills
 
-#### **NCS Feature Planning**
-Feature selection matrices, overlays, and prioritization aids.
-- Location: `ProductManager/ncs/features/`
-- Entry: [SKILL.md](ProductManager/ncs/features/SKILL.md)
+#### `chsh-pm-prd` — PRD & Feature Planning
+PRD template, feature selection matrices, and configuration overlays for NCS projects.
+- Entry: [SKILL.md](chsh-pm-prd/SKILL.md)
+- Key assets:
+	- [prd/PRD_TEMPLATE.md](chsh-pm-prd/prd/PRD_TEMPLATE.md)
+	- [FEATURE_SELECTION.md](chsh-pm-prd/FEATURE_SELECTION.md)
+	- [overlays/](chsh-pm-prd/overlays/) — ready-to-use Kconfig overlays
 
-#### **PRD Toolkit**
-Canonical PRD template and supporting material.
-- Location: `ProductManager/ncs/prd/`
-- Key asset: [PRD_TEMPLATE.md](ProductManager/ncs/prd/PRD_TEMPLATE.md)
-
-#### **NCS Review Framework**
+#### `chsh-pm-review` — NCS Project Review & QA
 Checklists, report templates, and automation scripts for validating builds against the PRD.
-- Location: `ProductManager/ncs/review/`
-- Highlights:
-	- [CHECKLIST.md](ProductManager/ncs/review/CHECKLIST.md)
-	- [QA_TEMPLATE.md](ProductManager/ncs/review/QA_TEMPLATE.md)
-	- [check_project.sh](ProductManager/ncs/review/check_project.sh)
+- Entry: [SKILL.md](chsh-pm-review/SKILL.md)
+- Key assets:
+	- [CHECKLIST.md](chsh-pm-review/CHECKLIST.md)
+	- [QA_TEMPLATE.md](chsh-pm-review/QA_TEMPLATE.md)
+	- [check_project.sh](chsh-pm-review/check_project.sh)
+
+### Linguist Skills
+
+#### `chsh-norsk-teach` — Norwegian Teacher
+Vocabulary, grammar explanations, and example sentences for learning Norwegian.
+- Entry: [SKILL.md](chsh-norsk-teach/SKILL.md)
+
+#### `chsh-norsk-medling` — Message Reviewer
+Polish replies to customers or colleagues: friendly, professional, clear.
+- Entry: [SKILL.md](chsh-norsk-medling/SKILL.md)
+
+---
 
 ## 🚀 Usage
 
-Skills are designed to be referenced during development conversations. Each skill provides:
-- Templates and configurations
-- Documentation and guides
-- Automation scripts
-- Best practices
+Skills are loaded during development conversations. Each skill provides templates,
+guides, automation scripts, and best practices.
 
 ### Invocation Pattern
 
-- Declare the role, domain, and desired skill, for example: “As Developer of NCS, I want to do env-setup with NCS 3.2.1.”
-- The assistant maps the role to the matching directory (Developer, ProductManager, linguist) and loads the requested sub-skill (env-setup, project, features, review, etc.).
-- Mention additional context (board, SDK version, target feature) so the assistant pulls the relevant files within that subdirectory.
+Mention the skill name in your request, for example:
+- *"Use `chsh-dev-project` to generate a new Wi-Fi STA project."*
+- *"Run `chsh-pm-review` on the nordic-wifi-webdash project."*
+- *"Commit with `chsh-dev-commit`."*
 
 ## 📁 Structure
 
 ```
 skills/
-├── Developer/
-│   └── ncs/
-│       ├── env-setup/
-│       ├── debug/
-│       ├── mem-opt/
-│       └── project/
-├── ProductManager/
-│   └── ncs/
-│       ├── features/
-│       ├── prd/
-│       └── review/
-├── linguist/
-│   ├── message-reviewer/
-│   └── norwegian-teacher/
+├── chsh-dev-commit/       Git commit workflow
+├── chsh-dev-mem-opt/      Memory optimization
+├── chsh-dev-project/      NCS project lifecycle
+│   ├── debug/
+│   ├── env-setup/
+│   ├── architecture/
+│   ├── protocols/
+│   │   └── webserver/
+│   ├── wifi/
+│   ├── templates/
+│   ├── guides/
+│   └── examples/
+├── chsh-pm-prd/           PRD & feature planning
+│   ├── prd/
+│   └── overlays/
+├── chsh-pm-review/        Project review & QA
+├── chsh-norsk-teach/      Norwegian teaching
+├── chsh-norsk-medling/    Message review
 ├── README.md
 └── .gitignore
 ```
 
 ## 🔄 Workflow Integration
 
-Skills support iterative development workflows:
-
 ```
-Generate → Develop → Review → QA Report → Fix → Improve → Generate
+PRD (chsh-pm-prd) → Generate (chsh-dev-project) → Develop → Review (chsh-pm-review) → QA Report → Fix → Improve
 ```
 
 ## 📊 Token Efficiency
 
-Skills are optimized for token consumption:
-- Core SKILL.md files: ~2,000 tokens (auto-loaded)
+- Core `SKILL.md` files: ~2,000 tokens (auto-loaded)
 - Detailed guides: 5,000+ tokens (loaded on-demand)
-- Templates and configs: Accessed as needed
+- Templates and configs: accessed as needed
 
 ## 📝 License
 
@@ -114,11 +120,7 @@ Individual skills may reference or include:
 - Apache License 2.0
 - MIT License
 
-## 👤 Author
-
-**Charlie Shao** ([@chshzh](https://github.com/chshzh))  
-Nordic Semiconductor - Oslo, Norway
 
 ## 📅 Last Updated
 
-February 3, 2026
+April 9, 2026
