@@ -14,15 +14,23 @@ Plan, group, and execute git commits following Conventional Commits style.
 Strategies for footprint reduction and heap profiling in NCS/Zephyr projects.
 - Entry: [SKILL.md](chsh-dev-mem-opt/SKILL.md)
 
-#### `chsh-dev-project` — NCS Project Workflow
-Complete lifecycle management: generate → develop → review → improve.
-Includes sub-skills for debug, env-setup, architecture patterns, protocols, and Wi-Fi.
+#### `chsh-dev-spec` — Technical Design (Phase 2)
+Translates an approved PRD into engineering specs: architecture overview, per-module specs
+(state machines, Kconfig, APIs, memory), and `config.yaml`.
+- Entry: [SKILL.md](chsh-dev-spec/SKILL.md)
+- Templates:
+	- [ARCH_TEMPLATE.md](chsh-dev-spec/ARCH_TEMPLATE.md) — architecture spec template
+	- [MODULE_TEMPLATE.md](chsh-dev-spec/MODULE_TEMPLATE.md) — module spec template
+
+#### `chsh-dev-project` — Code Implementation (Phase 3)
+Implements NCS project code from engineering specs. Scaffolds new projects, implements
+modules, and updates code when specs change.
 - Entry: [SKILL.md](chsh-dev-project/SKILL.md)
 - Quick start:
 	- `cp ~/.claude/skills/chsh-dev-project/templates/.gitignore ./`
 	- `cp ~/.claude/skills/chsh-dev-project/templates/LICENSE ./`
 	- `cp ~/.claude/skills/chsh-dev-project/templates/README_TEMPLATE.md README.md`
-	- `cp ~/.claude/skills/chsh-dev-project/wifi/configs/wifi-sta.conf overlay-wifi.conf`
+	- `cp ~/.claude/skills/chsh-dev-project/overlays/overlay-wifi-sta.conf .`
 - Sub-skills:
 	- [debug/SKILL.md](chsh-dev-project/debug/SKILL.md) — debugging, RTT, GDB
 	- [env-setup/SKILL.md](chsh-dev-project/env-setup/SKILL.md) — toolchain & west setup
@@ -34,7 +42,8 @@ Includes sub-skills for debug, env-setup, architecture patterns, protocols, and 
 ### Product Manager Skills
 
 #### `chsh-pm-prd` — Interactive PRD Authoring
-Guides the Product Manager through creating and maintaining versioned PRD documents.
+Guides the Product Manager through creating and maintaining `docs/product/PRD.md`.
+Changes are tracked via a Revision History table inside the document (no dated filenames).
 - Entry: [SKILL.md](chsh-pm-prd/SKILL.md)
 - Template: [PRD_TEMPLATE.md](chsh-pm-prd/PRD_TEMPLATE.md)
 
@@ -72,16 +81,19 @@ Mention the skill name in your request, for example:
 skills/
 ├── chsh-dev-commit/       Git commit workflow
 ├── chsh-dev-mem-opt/      Memory optimization
-├── chsh-dev-project/      NCS project lifecycle
+├── chsh-dev-spec/       Technical design — specs from PRD
+│   ├── ARCH_TEMPLATE.md
+│   └── MODULE_TEMPLATE.md
+├── chsh-dev-project/      Code implementation from specs
 │   ├── debug/
 │   ├── env-setup/
 │   ├── architecture/
 │   ├── protocols/
 │   │   └── webserver/
 │   ├── wifi/
+│   ├── overlays/
 │   ├── templates/
-│   ├── guides/
-│   └── examples/
+│   └── guides/
 ├── chsh-pm-prd/           PRD authoring (SKILL.md + PRD_TEMPLATE.md)
 ├── chsh-pm-review/        Project review & QA
 ├── chsh-txt-review/       Text / message review
@@ -95,8 +107,10 @@ skills/
 See [NCS-Project-WORKFLOW.md](NCS-Project-WORKFLOW.md) for the full four-phase lifecycle:
 
 ```
-chsh-pm-prd  →  PRD-YYYY-MM-DD.md  →  chsh-dev-project  →  docs/engineering/specs/  →  code  →  chsh-pm-review
+chsh-pm-prd  →  PRD.md  →  chsh-dev-spec  →  docs/engineering/specs/  →  chsh-dev-project  →  code  →  chsh-pm-review
 ```
+
+All documents use a **Revision History table** (not dated filenames) except QA reports, which are dated snapshots (`QA-YYYY-MM-DD.md`).
 
 ## 📊 Token Efficiency
 

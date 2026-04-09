@@ -1,11 +1,11 @@
 ---
 name: chsh-pm-review
-description: Review NCS project quality and generate QA reports. Use when validating a project against its PRD, running automated checks, or filling out a QA report.
+description: Review NCS project quality and generate QA reports. Use when validating a project against its PRD, running automated checks, or filling out a QA report. Reads docs/product/PRD.md (single canonical PRD with Revision History table).
 ---
 
 # NCS Project Review Skill
 
-Quality assurance review for Nordic NCS projects. Validates implementation against PRD.md (business) and engineering specs (technical).
+Quality assurance review for Nordic NCS projects. Validates implementation against `docs/product/PRD.md` (business requirements) and `docs/engineering/specs/` (technical specs).
 
 ## Quick Start
 
@@ -47,7 +47,14 @@ cp ~/.claude/skills/chsh-pm-review/QA_TEMPLATE.md /path/to/project/docs/qa/QA.md
 | 60–69 | Needs work — significant problems |
 | < 60 | Fail — major rework required |
 
+## Document Conventions
+
+- **PRD**: `docs/product/PRD.md` — single file with Revision History table. Use the latest revision date to know what version was active during this QA run.
+- **Specs**: `docs/engineering/specs/*.md` — each spec also has a Revision History table.
+- **QA output**: `docs/qa/QA-YYYY-MM-DD.md` — dated files, one per review run (each is a standalone audit snapshot).
+
 ## Related Skills
 
-- `chsh-pm-prd` — create/update PRD.md and feature selection
-- `chsh-dev-project` — NCS project generation and development
+- `chsh-pm-prd` — create/update `docs/product/PRD.md`
+- `chsh-dev-spec` — create/update engineering specs in `docs/engineering/specs/`
+- `chsh-dev-project` — implement code from specs

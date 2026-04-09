@@ -1,12 +1,12 @@
 ---
 name: chsh-pm-prd
-description: Interactive PRD authoring for NCS IoT projects. Guides the Product Manager through creating, extending, or updating a versioned PRD-YYYY-MM-DD.md under docs/product/. No coding knowledge required. Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes.
+description: Interactive PRD authoring for NCS IoT projects. Guides the Product Manager through creating, extending, or updating PRD.md under docs/product/. No coding knowledge required. Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes.
 ---
 
 # chsh-pm-prd — Interactive PRD Workflow
 
 This skill is for the **Product Manager** role. It asks questions in plain language
-and produces a versioned `PRD-YYYY-MM-DD.md` in `docs/product/`.
+and maintains a single `PRD.md` in `docs/product/` with a built-in revision history table.
 
 No Kconfig, no Flash/RAM numbers, no architecture diagrams — those are for the engineer.
 The PRD answers: **What should this device do, for whom, and how should it behave?**
@@ -20,17 +20,17 @@ Template: [`PRD_TEMPLATE.md`](PRD_TEMPLATE.md)
 Check what exists in the project:
 
 ```bash
-ls docs/product/PRD-*.md 2>/dev/null | sort | tail -1   # latest PRD
+cat docs/product/PRD.md 2>/dev/null           # existing PRD (check Revision History)
 git log --oneline -10 -- src/ prj.conf CMakeLists.txt    # recent code changes
 ```
 
 Present the user with the right starting options:
 
 | Situation | Offer |
-|---|---|
+|-----------|-------|
 | No PRD exists yet | **New** |
-| PRD exists, no code changes since its date | **Add Feature** or **Change Feature** |
-| PRD exists, code commits exist after its date | **Update** (code moved ahead of PRD), **Add Feature**, or **Change Feature** |
+| PRD exists, no code changes after last PRD revision date | **Add Feature** or **Change Feature** |
+| PRD exists, code commits exist after its last revision date | **Update** (code moved ahead of PRD), **Add Feature**, or **Change Feature** |
 
 Ask: *"Which would you like to do?"* — then follow the matching section below.
 
@@ -98,7 +98,7 @@ Ask: which P0 requirements must all pass before the product can be released?
 
 ## Mode B — Add Feature
 
-1. Read the latest `docs/product/PRD-*.md`.
+1. Read `docs/product/PRD.md` and check the current **Revision History**.
 2. Show the current feature list (Sections 2 and 3) as a brief summary.
 3. Ask: *"What feature would you like to add?"*
 4. For the new feature, ask:
@@ -113,7 +113,7 @@ Ask: which P0 requirements must all pass before the product can be released?
 
 ## Mode C — Change Feature
 
-1. Read the latest `docs/product/PRD-*.md`.
+1. Read `docs/product/PRD.md` and check the current **Revision History**.
 2. List the current functional requirements (FR-xxx) with one-line titles.
 3. Ask: *"Which requirement would you like to change?"*
 4. Show the current text, then ask what should change:
@@ -131,9 +131,10 @@ Use this when the developer has made code changes but the PRD has not been updat
 
 ### D1. Find the gap
 
+Read the **Revision History** table in `docs/product/PRD.md` to get the last PRD revision date.
+
 ```bash
-LATEST=$(ls docs/product/PRD-*.md | sort | tail -1)
-PRD_DATE=$(echo "$LATEST" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+PRD_DATE=<last revision date from table>
 git log --oneline --since="$PRD_DATE" -- src/ prj.conf CMakeLists.txt Kconfig boards/
 ```
 
@@ -146,7 +147,7 @@ For each commit or changed area, describe in plain language what the code change
 Present a table to the user:
 
 | Code change | User-visible effect | Update PRD? |
-|---|---|---|
+|-------------|---------------------|-------------|
 | Added wifi-p2p support | New connectivity option for users | Yes / No |
 | Fixed DHCP timeout | Faster connection (non-visible internally) | No |
 
@@ -165,11 +166,12 @@ Proceed to **Generate Output**.
 
 After any mode:
 
-1. Get today's date: `date +%Y-%m-%d`
-2. Write `docs/product/PRD-YYYY-MM-DD.md` using the template at
-   `~/.claude/skills/chsh-pm-prd/prd/PRD_TEMPLATE.md` as the structure.
-3. If a previous PRD exists, add a **Changelog** entry at the top with a one-line summary of what changed.
-4. Confirm: *"PRD saved to `docs/product/PRD-YYYY-MM-DD.md`."*
+1. Update `docs/product/PRD.md` using `PRD_TEMPLATE.md` as the structure.
+2. Add a new row to the **Revision History** table at the bottom of the document:
+   ```markdown
+   | YYYY-MM-DD | <version+0.1> | <author> | <one-line summary of changes> |
+   ```
+3. Confirm: *"PRD updated. New revision added to Revision History."*
 
 ---
 
@@ -177,10 +179,9 @@ After any mode:
 
 After saving the PRD, always ask:
 
-> "The PRD is ready at `docs/product/PRD-YYYY-MM-DD.md`.
+> "The PRD is updated at `docs/product/PRD.md` (see Revision History for this change).
 >
-> Would you like to hand off to **chsh-dev-project** now to:
-> - Update the engineering specs in `docs/engineering/specs/` to match this PRD, and/or
-> - Implement or update the code?
+> Would you like to hand off to **chsh-dev-spec** to update the engineering specs,
+> or to **chsh-dev-project** to implement or update the code?
 >
-> Reply **yes** to continue, or **no** to stop here."
+> Reply **design**, **implement**, or **no** to stop here."
