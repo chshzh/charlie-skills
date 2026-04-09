@@ -1,4 +1,25 @@
-# System Architecture Specification — <Project Name> <version>
+# System Architecture Specification — <Project Name>
+
+## Document Information
+
+| Field | Value |
+|-------|-------|
+| Project | |
+| Version | YYYY-MM-DD |
+| Author | |
+| NCS Version | e.g. v3.2.4 |
+| Target Board(s) | e.g. nRF7002DK |
+| Status | Draft |
+
+---
+
+## Changelog
+
+| Version | Summary of changes |
+|---|---|
+| YYYY-MM-DD | Initial architecture design |
+
+---
 
 ## Overview
 
@@ -78,8 +99,4 @@ struct <msg_type> {
 
 ---
 
-## Revision History
-
-| Date | Version | Author | Summary |
-|------|---------|--------|---------|
-| YYYY-MM-DD | 1.0 | <Author> | Initial architecture design |
+*(Changelog is maintained at the top of this document.)*

@@ -54,6 +54,7 @@ Derive the required spec files from PRD features. Always required:
 
 | File | Content |
 |------|---------|
+| `docs/engineering/specs/overview.md` | Entry point — spec index, PRD-to-spec mapping, design decisions |
 | `docs/engineering/specs/architecture.md` | System overview, module map, Zbus channels, boot sequence, memory budget |
 | `docs/engineering/config.yaml` | Project context fed to `chsh-dev-project` |
 
@@ -92,7 +93,19 @@ modules:
     enabled: true
 ```
 
-### A4. Generate `docs/engineering/specs/architecture.md`
+### A4. Generate `docs/engineering/specs/overview.md`
+
+Use `OVERVIEW_TEMPLATE.md` as the base. Fill in:
+
+- **Spec Index**: list every spec file to be generated, with a one-line description and the PRD sections it covers
+- **Architecture Summary**: pattern choice (SMF+Zbus vs multi-threaded) and the top 3–5 design decisions with rationale
+- **PRD-to-Spec Mapping**: table mapping each FR/NFR to the spec file that implements it
+- **Module Dependency Map**: ASCII diagram of Zbus message flows between modules
+- **Open Issues**: any unresolved design questions before work starts
+
+Add the changelog entry (initial version, today's date).
+
+### A6. Generate `docs/engineering/specs/architecture.md`
 
 Use `ARCH_TEMPLATE.md` as the base. Fill in:
 
@@ -106,7 +119,7 @@ Use `ARCH_TEMPLATE.md` as the base. Fill in:
 
 Add the revision history entry (version 1.0, today's date).
 
-### A5. Generate per-module specs
+### A7. Generate per-module specs
 
 For each module from A2, use `MODULE_TEMPLATE.md` as base. Fill in:
 
@@ -123,7 +136,7 @@ For each module from A2, use `MODULE_TEMPLATE.md` as base. Fill in:
 
 Add the revision history entry (version 1.0, today's date).
 
-### A6. Confirm and handoff
+### A8. Confirm and handoff
 
 After all specs are generated:
 
@@ -156,11 +169,15 @@ For each impacted spec file:
 - If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`.
 - If a module is removed, mark it `[DEPRECATED]` in the header; do not delete.
 
-### B3. Update `architecture.md`
+### B3. Update `architecture.md` and `overview.md`
 
 If the module map, Zbus channels, or memory budget changed:
-- Update those sections.
-- Add a Revision History entry.
+- Update those sections in `architecture.md` and add a Changelog entry.
+
+Always update `overview.md`:
+- Add/remove rows from the Spec Index and PRD-to-Spec Mapping tables.
+- Update the Module Dependency Map if inter-module message flows changed.
+- Add a Changelog entry to `overview.md`.
 
 ### B4. Handoff
 
@@ -202,21 +219,22 @@ Output the report to the user. If gaps exist, offer to fix them (Mode B).
 
 ---
 
-## Revision History Convention
+## Changelog Convention
 
-Every document produced by this skill must include a **Revision History** table as the last
-section before any appendices:
+Every document produced by this skill must include a **Changelog** table near the top
+(after Document Information), matching the format used in `PRD.md`:
 
 ```markdown
-## Revision History
+## Changelog
 
-| Date       | Version | Author | Summary                        |
-|------------|---------|--------|--------------------------------|
-| YYYY-MM-DD | 1.0     | <name> | Initial design                 |
+| Version    | Summary of changes          |
+|------------|-----------------------------|
+| YYYY-MM-DD | Initial design              |
+| YYYY-MM-DD | Updated wifi state machine  |
 ```
 
 Rules:
-- Version follows `MAJOR.MINOR` — increment MINOR for small changes, MAJOR for architectural changes.
-- Date is always ISO 8601 (`YYYY-MM-DD`).
+- Version is the date the change was made (`YYYY-MM-DD`).
 - Never delete rows; the table is append-only.
-- Git tracks the actual diff; this table provides the human-readable log.
+- Keep the summary short — one line describing what changed.
+- Git tracks the actual diff; the Changelog is the human-readable log.

@@ -19,6 +19,7 @@ Translates an approved PRD into engineering specs: architecture overview, per-mo
 (state machines, Kconfig, APIs, memory), and `config.yaml`.
 - Entry: [SKILL.md](chsh-dev-spec/SKILL.md)
 - Templates:
+	- [OVERVIEW_TEMPLATE.md](chsh-dev-spec/OVERVIEW_TEMPLATE.md) — top-level spec index + PRD-to-spec mapping
 	- [ARCH_TEMPLATE.md](chsh-dev-spec/ARCH_TEMPLATE.md) — architecture spec template
 	- [MODULE_TEMPLATE.md](chsh-dev-spec/MODULE_TEMPLATE.md) — module spec template
 
@@ -81,7 +82,8 @@ Mention the skill name in your request, for example:
 skills/
 ├── chsh-dev-commit/       Git commit workflow
 ├── chsh-dev-mem-opt/      Memory optimization
-├── chsh-dev-spec/       Technical design — specs from PRD
+├── chsh-dev-spec/         Technical design — specs from PRD
+│   ├── OVERVIEW_TEMPLATE.md
 │   ├── ARCH_TEMPLATE.md
 │   └── MODULE_TEMPLATE.md
 ├── chsh-dev-project/      Code implementation from specs

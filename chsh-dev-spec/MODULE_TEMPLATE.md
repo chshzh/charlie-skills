@@ -1,4 +1,23 @@
-# <Module Name> Module Specification — <version>
+# <Module Name> Module Specification
+
+## Document Information
+
+| Field | Value |
+|-------|-------|
+| Module | |
+| Version | YYYY-MM-DD |
+| Author | |
+| Status | Draft |
+
+---
+
+## Changelog
+
+| Version | Summary of changes |
+|---|---|
+| YYYY-MM-DD | Initial module spec |
+
+---
 
 ## Overview
 
@@ -117,8 +136,4 @@ int <module>_<function>(/* params */);
 
 ---
 
-## Revision History
-
-| Date | Version | Author | Summary |
-|------|---------|--------|---------|
-| YYYY-MM-DD | 1.0 | <Author> | Initial module spec |
+*(Changelog is maintained at the top of this document.)*
