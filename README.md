@@ -109,20 +109,19 @@ skills/
 ├── chsh-pm-prd/           PRD authoring (SKILL.md + PRD_TEMPLATE.md)
 ├── chsh-pm-review/        QA report + functional test report
 ├── chsh-txt-review/       Text / message review
-├── NCS-Project-WORKFLOW.md  Cross-skill lifecycle reference
 ├── README.md
 └── .gitignore
 ```
 
 ## 🔄 Workflow Integration
 
-See [NCS-Project-WORKFLOW.md](NCS-Project-WORKFLOW.md) for the full four-phase lifecycle:
+See [`chsh-ncs-workflow/SKILL.md`](chsh-ncs-workflow/SKILL.md) for the full four-phase lifecycle, document conventions, and ownership table:
 
 ```
 chsh-pm-prd  →  PRD.md  →  chsh-dev-spec  →  docs/engineering/specs/  →  chsh-dev-project  →  code  →  chsh-pm-review
 ```
 
-All documents use a **Revision History table** (not dated filenames) except QA reports, which are dated snapshots (`QA-YYYY-MM-DD.md`).
+Living documents (`PRD.md`, specs) use a **Changelog table**. QA/Test reports use dated filenames (`TEST-YYYY-MM-DD-HH-MM.md`, `QA-YYYY-MM-DD-HH-MM.md`).
 
 ## 📊 Token Efficiency
 
