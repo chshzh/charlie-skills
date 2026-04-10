@@ -34,6 +34,50 @@
 
 ---
 
+## Module Type
+
+- [ ] **Application module** — follows the project architecture pattern (SMF+Zbus or multi-threaded).
+- [ ] **Library wrapper module** — wraps an external library. The library runs its own internal
+  threads; this module calls library APIs and implements library callbacks. Fill in the
+  **External Library Interface** section below and omit or simplify the State Machine section.
+
+---
+
+## External Library Interface
+
+> Fill in this section for library wrapper modules only. Remove for application modules.
+
+| Field | Value |
+|-------|-------|
+| Library | e.g. Memfault SDK |
+| NCS Kconfig | e.g. `CONFIG_MEMFAULT=y` |
+| Library internal threads | e.g. `memfault_http_upload` (managed by SDK) |
+
+**APIs called by this module** (app → library):
+
+```c
+/* Key library functions this module calls */
+<lib_function_a>(/* params */);   /* purpose */
+<lib_function_b>(/* params */);   /* purpose */
+```
+
+**Callbacks implemented by this module** (library → app):
+
+```c
+/* Callback signatures the library requires the app to implement */
+void <lib_callback_a>(void) { /* app provides this */ }
+```
+
+**Zbus integration** — how library events are forwarded to the rest of the app:
+
+| Library event / callback | Zbus channel published | Message |
+|--------------------------|----------------------|---------|
+| `<lib_callback>` fired | `<CHANNEL>` | `<message type>` |
+
+> If the library has no Zbus integration (fire-and-forget), note it here.
+
+---
+
 ## Zbus Integration
 
 **Subscribes to**: `<CHANNEL_NAME>` — <when and why it reads this channel>

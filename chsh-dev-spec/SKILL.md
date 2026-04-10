@@ -1,6 +1,6 @@
 ---
 name: chsh-dev-spec
-description: Translate an approved PRD into engineering specs under docs/specs/. Produces architecture.md, per-module specs. Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design.
+description: Translate an approved PRD into engineering specs under docs/specs/. Produces architecture.md, per-module specs (app modules and library wrapper modules). Architecture pattern applies to application code only; library wrappers document the external lib API boundary. Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design.
 ---
 
 # chsh-dev-spec — Technical Design Workflow
@@ -41,6 +41,10 @@ Load `docs/PRD.md`. Extract:
 - Project name, NCS version, target board(s)
 - Selected feature list (FR entries)
 - Architecture pattern — SMF+Zbus or multi-threaded (ask the user if not stated)
+  > **Scope**: the architecture pattern applies to **application code only**.
+  > External libraries (Memfault SDK, Wi-Fi driver, BLE stack) run their own internal
+  > threads regardless of the chosen pattern. Wrapper modules (`app_<lib>/`) bridge them.
+- External libraries used (Memfault, BLE provisioning, etc.) — identify which need a wrapper module
 - Hardware matrix: buttons, LEDs per board
 - Non-functional requirements: memory headroom, latency targets, security notes
 
@@ -58,15 +62,18 @@ Derive the required spec files from PRD features. Always required:
 
 Per module (one file per significant feature):
 
-| Feature in PRD | Spec file |
-|----------------|-----------|
-| Wi-Fi (SoftAP / STA / P2P) | `wifi-module.md` |
-| HTTP web server / REST API | `webserver-module.md` |
-| Button / GPIO | `button-module.md` |
-| LED output | `led-module.md` |
-| Mode selection / persistence | `mode-selector.md` |
-| MQTT client | `mqtt-client.md` |
-| *(any significant module)* | `<name>-module.md` |
+| Module type | Feature / Library | Spec file |
+|-------------|-------------------|-----------|
+| App module | Wi-Fi (SoftAP / STA / P2P) | `wifi-module.md` |
+| App module | HTTP web server / REST API | `webserver-module.md` |
+| App module | Button / GPIO | `button-module.md` |
+| App module | LED output | `led-module.md` |
+| App module | Mode selection / persistence | `mode-selector.md` |
+| App module | MQTT client | `mqtt-client.md` |
+| **Lib wrapper** | **Memfault SDK** | **`app-memfault-module.md`** |
+| **Lib wrapper** | **BLE provisioning** | **`app-wifi-prov-ble-module.md`** |
+| *(app module)* | *(any significant feature)* | `<name>-module.md` |
+| *(lib wrapper)* | *(any external library)* | `app-<lib>-module.md` |
 
 Present the plan to the user and confirm before generating.
 
@@ -99,8 +106,9 @@ Add the revision history entry (version 1.0, today's date).
 
 ### A7. Generate per-module specs
 
-For each module from A2, use `MODULE_TEMPLATE.md` as base. Fill in:
+For each module from A2, use `MODULE_TEMPLATE.md` as base. Select the module type first:
 
+**For application modules** (SMF+Zbus or multi-threaded):
 - **Overview**: role of this module, version notes
 - **File location**: `src/modules/<name>/` — list expected files
 - **Zbus Integration**: channels subscribed to and published on, with struct definitions
@@ -110,9 +118,18 @@ For each module from A2, use `MODULE_TEMPLATE.md` as base. Fill in:
 - **Error Handling**: list of error conditions and how each is handled
 - **Memory Estimate**: Flash KB / RAM KB (static + stack)
 - **Test Points**: UART log strings expected when module works correctly
-- **Open Issues / TBD**: anything not yet decided
 
-Add the revision history entry (version 1.0, today's date).
+**For library wrapper modules** (`app_<lib>/`) — additional required sections:
+- **External Library Interface** section (do not skip):
+  - Library name and NCS Kconfig symbol (e.g. `CONFIG_MEMFAULT=y`)
+  - Library internal threads (e.g. the Memfault SDK starts an HTTP upload thread)
+  - **APIs called** by the wrapper: list the key `<lib_function>()` calls with purpose
+  - **Callbacks implemented**: list every callback signature the library expects the app to provide
+  - **Zbus integration**: table showing how library callbacks translate into Zbus messages published to the rest of the app
+- Simplify or omit the State Machine section (lib wrapper typically has no SMF state machine)
+- Note any thread-safety constraints (e.g. callbacks arriving in lib's thread context)
+
+Add the changelog entry (initial version, today's date).
 
 ### A8. Confirm and handoff
 

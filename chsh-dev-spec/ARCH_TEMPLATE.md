@@ -24,10 +24,17 @@
 
 ## Overview
 
-<Project Name> uses a **<SMF+Zbus modular | multi-threaded> architecture**.
-Each feature lives in its own module under `src/modules/`.
+**Application architecture**: <Project Name> application code uses a **<SMF+Zbus modular | multi-threaded> architecture**.
+Each application feature lives in its own module under `src/modules/`.
 <All inter-module communication is exclusively through Zbus channels. | Modules communicate via queues/semaphores.>
-Modules initialize through `SYS_INIT` at priority-ordered boot time.
+Application modules initialize through `SYS_INIT` at priority-ordered boot time.
+
+> **Scope note**: The architecture pattern describes **application code only**.
+> External libraries (Memfault SDK, Wi-Fi driver, BLE stack, etc.) run in their own
+> internal threads and are not subject to this architecture. Application-level wrapper
+> modules (`app_<lib>/`) provide the interface boundary — calling library APIs,
+> implementing required callbacks, and integrating library events into the app's
+> Zbus message flow.
 
 <Brief description of what this version adds or changes vs. prior version.>
 
@@ -40,9 +47,13 @@ src/
 ├── main.c                        ← startup banner, SYS_INIT trigger
 └── modules/
     ├── messages.h                ← all Zbus message structs (shared)
+    │
+    │   ── Application modules (SMF+Zbus / multi-threaded) ──
     ├── <module_a>/               ← <brief role>
     ├── <module_b>/               ← <brief role>
-    └── <module_c>/               ← <brief role>
+    │
+    │   ── Library wrapper modules ──
+    └── app_<lib>/                ← wraps <lib name>; calls lib API + implements callbacks
 ```
 
 ---
@@ -67,6 +78,19 @@ struct <msg_type> {
     /* add fields */
 };
 ```
+
+---
+
+## External Libraries
+
+Libraries whose internal threading is **not** controlled by application code.
+Each must have a corresponding wrapper module in `src/modules/app_<lib>/`.
+
+| Library | NCS Kconfig | Internal threads | App wrapper module |
+|---------|-------------|------------------|--------------------|
+| `<lib_name>` | `CONFIG_<LIB>=y` | <thread name(s) if known> | `app_<lib>/` |
+
+> Remove this section if the project uses no external libraries.
 
 ---
 
