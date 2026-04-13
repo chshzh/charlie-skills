@@ -263,3 +263,14 @@ Rules:
 - Keep the summary short — one line describing what changed. When the change is driven by a PRD update, include the PRD version: `Updated to PRD v2026-04-09-10-00: added P2P mode`.
 - The `PRD Version` field in Document Information always reflects the PRD Changelog timestamp this spec was written against.
 - Git tracks the actual diff; the Changelog is the human-readable log.
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new spec templates, changelog conventions, architecture guidance).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

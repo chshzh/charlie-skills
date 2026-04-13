@@ -82,3 +82,14 @@ For any other version, always look up `toolchains.json`.
 - clang-format edits files **in-place** with `-i`. No backup is created — ensure git is clean first if needed.
 - If the project has no `.clang-format`, recommend copying from `<SDK>/zephyr/.clang-format` and setting `ColumnLimit: 80` (Zephyr checkpatch enforces 80, not 100).
 - Zephyr macros like `HTTP_RESOURCE_DEFINE` or `ZBUS_CHAN_DEFINE` may need `/* clang-format off/on */` guards if the formatter fights checkpatch style.
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new bundle IDs, new clang-format quirks, macro guard patterns).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

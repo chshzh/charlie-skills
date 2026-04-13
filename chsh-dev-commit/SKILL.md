@@ -34,7 +34,18 @@ Common types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `buil
 
 ### Step 3 — Wait for approval
 
-Do not run `git commit` until the user explicitly approves the plan (e.g. "looks good", "go ahead", "yes").
+After presenting the plan, use the `AskQuestion` tool to collect approval. Always offer these options:
+
+```
+Question: "Proceed with this commit plan?"
+Options:
+  - "Approve — commit as planned"
+  - "Edit commit messages first"
+  - "Re-group the commits"
+  - "Cancel"
+```
+
+Do not run `git commit` until the user selects **Approve**. Treat any other selection as a request to revise the plan.
 
 ### Step 4 — Execute approved commits
 
@@ -78,3 +89,14 @@ EOF
 - `west.yml` changes — always a separate commit with a clear rationale
 - `sysbuild/` files — group by logical purpose (e.g. mcuboot config changes together)
 - Generated partition manager files (`pm/`, `*.map`) — separate `chore` commit or omit if not meaningful
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new grouping patterns, NCS-specific file conventions, commit message conventions).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

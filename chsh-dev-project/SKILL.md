@@ -366,3 +366,14 @@ Copy these from the `ncs-project-logo` reference project:
 - Network stack (IPv4, TCP, DHCP) configured
 - All net events handled (CONNECTED, DISCONNECTED, IPV4_ADDR_ADD)
 - NO hardcoded credentials anywhere
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new critical Kconfig requirements, new sub-skill routing patterns, updated NCS Wi-Fi constraints).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

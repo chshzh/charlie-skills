@@ -168,3 +168,14 @@ Then ask:
 - `chsh-pm-prd` — update `docs/PRD.md` if requirements need changing
 - `chsh-dev-spec` — update `docs/specs/` if design gaps are found
 - `chsh-dev-project` — fix code for P0 issues
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new test report patterns, acceptance criteria templates, QA scoring rubrics).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

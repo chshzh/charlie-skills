@@ -315,3 +315,14 @@ The hook will display "Run push hook" and any validation errors before allowing 
 - Prompt may not change after PATH export; rely on the explicit bundle/version you set
 - To switch versions, repeat setup with new bundle ID and/or SDK path (no terminal restart needed)
 - When user says "NCS v3.2.1", clarify if they mean toolchain, SDK, or both
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new bundle IDs, new toolchain versions, new git workarounds, environment tips).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.

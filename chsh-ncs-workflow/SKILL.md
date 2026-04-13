@@ -280,3 +280,14 @@ docs/QA-2026-04-09-14-30.md
 | `chsh-qa-test` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
 | `chsh-dev-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-mem-opt` | Diagnosing memory usage | Heap / stack recommendations |
+
+## Self-Update Policy
+
+At the **end of each conversation**, review what was discovered and check whether any facts in this skill are new, corrected, or outdated (e.g. new phase transitions, skill routing changes, project lifecycle patterns).
+
+If updates are warranted:
+1. Collect all proposed changes with a brief rationale for each.
+2. Present a summary to the user and ask for approval using `AskQuestion`.
+3. Apply approved updates to this file immediately.
+
+Do **not** modify this skill mid-conversation unless the user explicitly asks.
