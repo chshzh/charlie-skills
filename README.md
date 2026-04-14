@@ -13,9 +13,9 @@ and guides through each phase — invoking the right skill at each step.
 
 ### Developer Skills
 
-#### `chsh-dev-commit` — Git Commit Workflow
+#### `chsh-git-commit` — Git Commit Workflow
 Plan, group, and execute git commits following Conventional Commits style.
-- Entry: [SKILL.md](chsh-dev-commit/SKILL.md)
+- Entry: [SKILL.md](chsh-git-commit/SKILL.md)
 
 #### `chsh-dev-mem-opt` — NCS Memory Optimization
 Strategies for footprint reduction and heap profiling in NCS/Zephyr projects.
@@ -80,14 +80,14 @@ guides, automation scripts, and best practices.
 Mention the skill name in your request, for example:
 - *"Use `chsh-dev-project` to generate a new Wi-Fi STA project."*
 - *"Run `chsh-qa-test` on the nordic-wifi-webdash project."*
-- *"Commit with `chsh-dev-commit`."*
+- *"Commit with `chsh-git-commit`."*
 
 ## 📁 Structure
 
 ```
 skills/
 ├── chsh-ncs-workflow/     Full lifecycle orchestrator (entry point)
-├── chsh-dev-commit/       Git commit workflow
+├── chsh-git-commit/       Git commit workflow
 ├── chsh-dev-mem-opt/      Memory optimization
 ├── chsh-dev-spec/         Technical design — specs from PRD
 │   ├── OVERVIEW_TEMPLATE.md

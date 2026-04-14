@@ -278,7 +278,7 @@ docs/QA-2026-04-09-14-30.md
 | `chsh-dev-spec` | Translating PRD to engineering specs | `docs/specs/*.md` |
 | `chsh-dev-project` | Implementing code from specs | `src/`, `prj.conf`, passing build |
 | `chsh-qa-test` | Validating a build against PRD and specs | `TEST-*.md` + `QA-*.md` |
-| `chsh-dev-commit` | Preparing git commits | Clean, logical commit history |
+| `chsh-git-commit` | Preparing git commits | Clean, logical commit history |
 | `chsh-dev-mem-opt` | Diagnosing memory usage | Heap / stack recommendations |
 
 ## Self-Update Policy

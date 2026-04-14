@@ -1,5 +1,5 @@
 ---
-name: chsh-dev-commit
+name: chsh-git-commit
 description: Use when the user asks to prepare commits, review changes for committing, commit all changes, or decide how to split work into multiple Git commits.
 ---
 
@@ -109,6 +109,8 @@ path.write_text(text)                      # restore full content
 ```
 
 **Why**: `git log -p <file>` then shows each logical change in its own commit — easier to bisect, review, or revert independently.
+
+**Pitfall**: Always verify the marker falls *before* the function/block closing lines. If the marker is the last statement in a function, the stripped file will be missing `return` and `}`, causing `expected declaration or statement at end of input` errors.
 
 ## Self-Update Policy
 
