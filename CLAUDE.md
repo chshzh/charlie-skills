@@ -65,7 +65,3 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### Git Commits
 - **Never commit without explicit user approval.** Always propose commit message(s) and wait for the user to say "yes", "commit", or equivalent before running `git commit`.
-
-### /graphify
-- **Trigger:** when user types `/graphify`
-- **Action:** Read `~/.claude/skills/graphify/SKILL.md` and follow its instructions before doing anything else.
