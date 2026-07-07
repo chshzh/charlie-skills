@@ -1,6 +1,6 @@
 ---
 name: chsh-ag-memfault
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 description: Memfault OTA release specialist for nordic-wifi-memfault. Handles symbol upload, OTA payload upload, release deployment, and aborting active deployments. Use when uploading symbols, creating or re-uploading a release, deploying to a cohort, or disabling an active OTA deployment. Requires build artifacts to already exist unless explicitly asked to rebuild.
 ---
 

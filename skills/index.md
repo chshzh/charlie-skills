@@ -1,7 +1,7 @@
 # Skills Index
 
 > Skill catalog. Each entry links to the SKILL.md for that skill.
-> Last updated: 2026-06-11 | Total skills: 23
+> Last updated: 2026-06-30 | Total skills: 24
 
 ## NCS / Firmware Workflow
 
@@ -21,6 +21,7 @@
 
 - [chsh-sk-ncs-tc-memfault-log-debug](chsh-sk-ncs-tc-memfault-log-debug/SKILL.md) — Debugs missing or truncated Memfault log entries
 - [chsh-sk-ncs-tc-wifi-throughput](chsh-sk-ncs-tc-wifi-throughput/SKILL.md) — Tests Wi-Fi throughput with zperf/iperf on nRF devices
+- [chsh-sk-ncs-tc-nrf70-fw-stats](chsh-sk-ncs-tc-nrf70-fw-stats/SKILL.md) — Parses nRF70 rpu_sys_fw_stats blobs; interprets PHY/LMAC counters for disconnect/lockup diagnosis
 
 ## Git & Release
 

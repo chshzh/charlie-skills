@@ -17,7 +17,7 @@ Follow the same toolchain resolution logic as `chsh-sk-ncs-env`:
 
 3. **Look up the bundle ID** from the toolchain version:
    ```sh
-   jq -r '.toolchains[] | select(.ncs_versions[]=="<VERSION>").identifier.bundle_id' \
+   jq -r '.[].toolchains[] | select(.ncs_versions[]=="<VERSION>").identifier.bundle_id' \
      /opt/nordic/ncs/toolchains/toolchains.json
    ```
 
@@ -81,11 +81,8 @@ For any other version, always look up `toolchains.json`.
 ## Notes
 
 - clang-format edits files **in-place** with `-i`. No backup is created — ensure git is clean first if needed.
-- If the project has no `.clang-format`, recommend copying from `<SDK>/zephyr/.clang-format` and setting `ColumnLimit: 80` (Zephyr checkpatch enforces 80, not 100).
+- If the project has no `.clang-format`, recommend copying `<SDK>/zephyr/.clang-format` as-is (it sets `ColumnLimit: 100`, matching Zephyr/NCS style).
 - Zephyr macros like `HTTP_RESOURCE_DEFINE` or `ZBUS_CHAN_DEFINE` may need `/* clang-format off/on */` guards if the formatter fights checkpatch style.
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

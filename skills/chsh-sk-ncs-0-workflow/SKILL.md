@@ -31,10 +31,9 @@ status dashboard, and guides you through each phase — invoking the right skill
 │                                                                              │
 │  Developer Engineer translates PRD into technical specs:                     │
 │  • Architecture choice (SMF+Zbus or multi-threaded)                          │
-│  • docs/dev-specs/overview.md                                                │
-│  • docs/dev-specs/architecture.md                                            │
-│  • docs/dev-specs/<module>.md (one per feature)                              │
-│  • docs/dev-specs/config.yaml (optional project context)                     │
+│  • docs/dev-specs/0-overview.md                                              │
+│  • docs/dev-specs/1-architecture.md                                          │
+│  • docs/dev-specs/<name>-module.md (one per feature)                         │
 │                                                                              │
 │  Input:  docs/pm-prd/PRD.md                                                  │
 │  Output: docs/dev-specs/*.md (PRD Version field set)                         │
@@ -74,17 +73,18 @@ Run this before anything else. Provide the project path if not already in it.
 ```bash
 # Existence check
 ls docs/pm-prd/PRD.md 2>/dev/null             && echo "PRD: YES"        || echo "PRD: NO"
-ls docs/dev-specs/overview.md 2>/dev/null     && echo "SPECS: YES"      || echo "SPECS: NO"
+ls docs/dev-specs/0-overview.md 2>/dev/null   && echo "SPECS: YES"      || echo "SPECS: NO"
 ls src/main.c 2>/dev/null                     && echo "CODE: YES"       || echo "CODE: NO"
-ls docs/qa-test/VALIDATION_REPORT.md 2>/dev/null && echo "VALIDATION: YES" || echo "VALIDATION: NO"
+ls docs/qa-test/VERIFICATION-*.md 2>/dev/null     && echo "VERIFICATION: YES" || echo "VERIFICATION: NO"
+ls docs/qa-test/VALIDATION_REPORT.md 2>/dev/null  && echo "VALIDATION: YES"   || echo "VALIDATION: NO"
 
 # Version extraction (only when all three exist)
-PRD_VER=$(grep -m1 '| [0-9]' docs/pm-prd/PRD.md 2>/dev/null | awk -F'|' '{print $2}' | tr -d ' ')
-SPEC_VER=$(grep -m1 '| [0-9]' docs/dev-specs/overview.md 2>/dev/null | awk -F'|' '{print $2}' | tr -d ' ')
+PRD_VER=$(awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/pm-prd/PRD.md 2>/dev/null | sort | tail -1)
+SPEC_VER=$(awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/dev-specs/0-overview.md 2>/dev/null | sort | tail -1)
 
 # Code version = last git commit timestamp that touched src/
 # If src/ has uncommitted changes, commit them first (use chsh-sk-ncs-3.4-git-commit)
-CODE_VER=$(git log --format="%ci" -- src/ 2>/dev/null | head -1 | awk '{print $1"-"$2}' | sed 's/://g; s/-[0-9]*$//; s/-/\//3; s/-/:/')
+CODE_VER=$(git log -1 --date=format:'%Y-%m-%d-%H-%M' --format='%cd' -- src/ 2>/dev/null)
 
 echo "PRD_VER:  $PRD_VER"
 echo "SPEC_VER: $SPEC_VER"
@@ -94,9 +94,20 @@ echo "CODE_VER: $CODE_VER"
 ### Version format
 
 - **PRD version** = newest timestamp row in `docs/pm-prd/PRD.md` Changelog (`YYYY-MM-DD-HH-MM`)
-- **Specs version** = newest timestamp row in `docs/dev-specs/overview.md` Changelog (`YYYY-MM-DD-HH-MM`)
-- **Code version** = `git log --format="%ci" -- src/ | head -1` converted to `YYYY-MM-DD-HH-MM`
+- **Specs version** = newest timestamp row in `docs/dev-specs/0-overview.md` Changelog (`YYYY-MM-DD-HH-MM`)
+- **Code version** = `git log -1 --date=format:'%Y-%m-%d-%H-%M' --format='%cd' -- src/` (`YYYY-MM-DD-HH-MM`)
   - ⚠️ If `src/` has **uncommitted changes**, invoke **chsh-sk-ncs-3.4-git-commit** first, then re-read `CODE_VER`.
+
+### Incomplete projects (fewer than three artifacts)
+
+The staleness table below and the A/B/C case labels apply **only when all three artifacts
+(PRD, Specs, Code) exist**. Before consulting the table:
+
+- If fewer than three artifacts exist, or `CODE_VER` is empty, do **not** compute a
+  newest-artifact verdict. Print `Newest artifact: n/a (incomplete project)` and route by
+  the **Quick-Entry Rules** table from the artifacts that are present (e.g. PRD-only → Phase 2).
+- If exactly two of the three exist, run the same newest-timestamp comparison on that 2-of-3
+  subset and sync the older one forward; reserve the A/B/C labels for the all-three case.
 
 ### Staleness decision table (all phases exist)
 
@@ -110,15 +121,18 @@ the others must be brought forward.
 | **Code** | PRD and/or Specs lag | Read `git log --oneline src/` from CODE_VER back to SPEC_VER (and PRD_VER); infer intent from commits; update Specs then PRD | **3.1 → 2 → 1 → 4.1** |
 | All equal | Nothing drifted | Skip to V&V | **4.1** |
 
-> **Tie-breaking:** if two artifacts share the same version, treat the *third* as the source of
-> truth if it is newer; otherwise treat the tie as "no drift" for that pair.
+> **Tie-breaking:** if two artifacts share the same version:
+> - **Third is newer** → the third is the source of truth (follow its Case A/B/C flow).
+> - **Third is older** → the tied pair is the source of truth; sync the lagging third *forward*
+>   (use the Case for whichever member of the pair drives that third — A if PRD, B if Specs).
+> - **Three-way tie** (all equal) → no drift; skip to V&V.
 
 ### Sync procedure by case
 
 **Case A — PRD is newest (flow: 1 → 2 → 3.1 → 4.1)**
 
 1. Read PRD Changelog rows newer than `SPEC_VER`.
-2. Load **chsh-sk-ncs-2-spec**: update `overview.md` and affected `<module>.md` files.
+2. Load **chsh-sk-ncs-2-spec**: update `0-overview.md` and affected `<module>.md` files.
    Set `PRD Version` to `PRD_VER`.
 3. Load **chsh-sk-ncs-3.1-coding**: implement spec changes in `src/`.
 4. Proceed to Phase 4.1.
@@ -137,7 +151,7 @@ the others must be brought forward.
    timestamp matches `SPEC_VER` (or the nearest earlier commit).
 2. Infer the engineering intent from those commits.
 3. Load **chsh-sk-ncs-2-spec**: document the implemented behaviour in specs; bump
-   `overview.md` Changelog.
+   `0-overview.md` Changelog.
 4. Load **chsh-sk-ncs-1-prd**: if the commits introduced user-visible behaviour changes,
    update `PRD.md`; add Changelog entry.
 5. Proceed to Phase 4.1.
@@ -152,8 +166,9 @@ Present the project status dashboard to the user:
 ═══════════════════════════════════════════════════════
   Phase 1 — PRD    [ YES / NO ]  version: YYYY-MM-DD-HH-MM
   Phase 2 — Specs  [ YES / NO ]  version: YYYY-MM-DD-HH-MM
-  Phase 3 — Code   [ YES / NO ]  version: YYYY-MM-DD-HH-MM
-  Phase 4 — V&V    [ YES / NO ]
+  Phase 3 — Code         [ YES / NO ]  version: YYYY-MM-DD-HH-MM
+  Phase 4.1 — Verification [ YES / NO ]
+  Phase 4.2 — Validation   [ YES / NO ]
 ═══════════════════════════════════════════════════════
   Newest artifact: <PRD | Specs | Code | all equal>
   → Recommended flow: <A | B | C | 4.1 only> — <reason>
@@ -186,9 +201,9 @@ Ask: *"Proceed with recommended flow, or choose a different starting point?"*
 **Run:** Load skill **chsh-sk-ncs-2-spec** and follow its workflow.
 
 **Outputs:**
-- `docs/dev-specs/overview.md` — spec index, PRD-to-spec mapping
-- `docs/dev-specs/architecture.md` — module map, Zbus channels, memory budget
-- `docs/dev-specs/<module>.md` — one per feature module
+- `docs/dev-specs/0-overview.md` — spec index, PRD-to-spec mapping
+- `docs/dev-specs/1-architecture.md` — module map, Zbus channels, memory budget
+- `docs/dev-specs/<name>-module.md` — one per feature module
 
 Each spec's `PRD Version` field must match the latest PRD Changelog timestamp.
 
@@ -253,8 +268,8 @@ log evidence of correct behavior.
 ### Document Information header
 
 Every `PRD.md` and engineering spec opens with a **Document Information** table whose
-fields come **verbatim from the matching template** (`PRD_TEMPLATE.md`, `OVERVIEW_TEMPLATE.md`,
-`ARCH_TEMPLATE.md`, `MODULE_TEMPLATE.md`) and stay identical from creation through every
+fields come **verbatim from the matching template** (`PRD_TEMPLATE.md`, `0-OVERVIEW_TEMPLATE.md`,
+`1-ARCHITECTURE_TEMPLATE.md`, `MODULE_TEMPLATE.md`) and stay identical from creation through every
 maintenance edit — no ad-hoc variants like `Latest Version`.
 
 - **`Version`** = the document's **own** latest edit timestamp (the current time, = its
@@ -300,8 +315,8 @@ Validation uses two **living** documents (fixed names, internal Changelog), not 
 | Document | Location | Owned by | Answers |
 |----------|----------|----------|---------|
 | `PRD.md` | `docs/pm-prd/` | Product Manager | What & why — features, behaviour, success metrics |
-| `overview.md` | `docs/dev-specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
-| `architecture.md` | `docs/dev-specs/` | Developer | System design, module map, memory budget |
+| `0-overview.md` | `docs/dev-specs/` | Developer | Spec index, PRD-to-spec map, design decisions |
+| `1-architecture.md` | `docs/dev-specs/` | Developer | System design, module map, memory budget |
 | `<module>.md` | `docs/dev-specs/` | Developer | State machines, Kconfig, APIs |
 | `VALIDATION_PLAN.md` / `VALIDATION_REPORT.md` | `docs/qa-test/` | Tester / PM | Test plan + PRD acceptance pass/fail, UART evidence, ZView memory watermarks |
 
@@ -321,7 +336,7 @@ Validation uses two **living** documents (fixed names, internal Changelog), not 
 | PRD done, no specs | Phase 2 |
 | Specs done, no code | Phase 3 |
 | Code done, need validation | Phase 4 |
-| Small bug fix only | Phase 3 (Mode C) |
+| Small bug fix only | Phase 3 — 3.1 Coding (or 3.2 Debug if a runtime crash) |
 | Feature request | Phase 1 (Mode B) |
 | Post-merge validation | Phase 4 |
 | All phases exist — PRD is newest | Step 0 Case A → flow 1→2→3.1→4.1 |
@@ -347,9 +362,6 @@ Validation uses two **living** documents (fixed names, internal Changelog), not 
 | `chsh-sk-ncs-3.5-release` | Tagging a release, watching CI, publishing firmware to GitHub | GitHub release with published artifact |
 | `chsh-sk-ncs-migrate` | Upgrading the project to a newer NCS version (single hop or multi-hop) | Migrated app, clean build, verified on hardware |
 | `chsh-sk-ncs-3.3-memopt` | Diagnosing memory usage | Heap / stack recommendations |
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

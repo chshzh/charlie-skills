@@ -75,9 +75,10 @@ nrfutil sdk-manager toolchain launch --ncs-version=v<source> -- \
   [-DEXTRA_CONF_FILE="<overlays>"]
 ```
 
-Flash and run a functional smoke test (see **chsh-sk-ncs-4.1-verification** —
-shortcut: boot → shell prompt → one feature command). Save the UART log as
-the baseline reference. **Do not proceed if the baseline fails.**
+Flash and run a functional smoke test on hardware (boot → shell prompt → one
+feature command; for the full hardware suite see **chsh-sk-ncs-4.2-validation**).
+Save the UART log as the baseline reference. **Do not proceed if the baseline
+fails.**
 
 ### 0d. Lock the baseline
 
@@ -114,8 +115,11 @@ Use stable releases only — skip `-rc`, `-dev`, `-tip` unless the user requests
 
 ### 1c. Pre-fetch migration material
 
-For each hop, fetch and read the migration guide AND release notes. Use the
-WebFetch tool to retrieve the current pages (URLs above). Capture:
+For each hop, read the migration guide AND release notes. Use
+`nordicsemi_search_sources` plus the locally installed NCS tree (the migration
+guides and release notes ship as RST/HTML under `nrf/doc/nrf/releases_and_maturity/`)
+and registered MCP resources — do **not** WebFetch docs.nordicsemi.com (forbidden
+host); the URLs above are human-readable references only. Capture:
 - Required code changes (Kconfig renames, header moves, API signatures)
 - Deprecated APIs the project may use
 - Build system changes (sysbuild, partition manager, board-name changes)
@@ -185,18 +189,19 @@ Iterate on warnings/errors. For each error:
 ```bash
 # Standard flash — preserves NVS and WiFi credentials
 nrfutil sdk-manager toolchain launch --ncs-version=v<target> -- \
-  west flash -d <app>/build --dev-id <SN>
+  west flash -d <app>/build [--dev-id <SN>]
+# --dev-id only needed with multiple boards attached; nrfutil device list gives the serial
 # Use --recover only for first flash or AP protection issues
 # WARNING: --recover/--erase wipe all flash including NVS/WiFi credentials
 ```
 
-Connect via UART (use `mcp_nordic-mcp_nordicsemi_workflow_ncs` for the helper
+Connect via UART (use `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` for the helper
 script) and run the same smoke test from Step 0c. Compare against the
 baseline log — first divergence identifies the regression.
 
 ### 2f. Commit the hop
 
-Use **chsh-sk-git**:
+Use **chsh-sk-ncs-3.4-git-commit**:
 
 ```bash
 git -C <app> tag migrated-v<target>
@@ -227,8 +232,9 @@ A smoke test per hop is not enough for a final delivery. After the last hop:
 
 1. Run the loop test for stability (≥ 10 passes for acceptance, 20 for
    release) — see **chsh-sk-ncs-3.2-debug** Mode F
-2. Run the full Phase 4 verification from **chsh-sk-ncs-4.1-verification** against the
-   PRD acceptance criteria
+2. Run the static Phase 4.1 verification (code review, clean build, doc audit
+   — no hardware) from **chsh-sk-ncs-4.1-verification**, then the full hardware
+   validation against the PRD acceptance criteria from **chsh-sk-ncs-4.2-validation**
 3. If a release is expected: tag and publish via **chsh-sk-ncs-3.5-release**
 
 ---
@@ -295,9 +301,6 @@ is faster than a migration. Surface this trade-off to the user up front.
 
 ---
 
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
-
 ## Self-Update Policy
 
 At the **end of each conversation**, review what was discovered and check
@@ -319,7 +322,8 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 |------|-------|
 | Toolchain install + west command wrapper | `chsh-sk-ncs-env` |
 | Build/runtime debugging during migration | `chsh-sk-ncs-3.2-debug` |
-| Functional test against PRD acceptance criteria | `chsh-sk-ncs-4.1-verification` |
+| Static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4.1-verification` |
+| Hardware validation against PRD acceptance criteria | `chsh-sk-ncs-4.2-validation` |
 | Per-hop commit | `chsh-sk-ncs-3.4-git-commit` |
 | Final release after migration | `chsh-sk-ncs-3.5-release` |
 | Update specs if migration changes architecture | `chsh-sk-ncs-2-spec` |

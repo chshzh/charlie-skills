@@ -1,6 +1,6 @@
 ---
 name: chsh-sk-ncs-3.5-release
-description: Use when tagging a release, watching CI, or publishing firmware to GitHub for NCS projects. Covers git tag → CI → GitHub Release artifact. After publishing, triggers chsh-sk-ncs-4.2-validation for hardware validation with pre-built firmware.
+description: Use when tagging a release, watching CI, or publishing firmware to GitHub for NCS projects. Covers git tag → CI → GitHub Release artifact. After publishing, triggers chsh-sk-ncs-4.2-validation to validate the released build on hardware via a local west build.
 ---
 
 # chsh-sk-ncs-3.5-release — Release Tagging & Publishing
@@ -112,12 +112,12 @@ gh release delete-asset v<MAJOR>.<MINOR>.<PATCH> merged.hex \
 
 ## Step 4 — Handoff to Validation
 
-Release published with pre-built firmware artifact available. Hand off to Phase 4.2 for hardware validation.
+Release published. Hand off to Phase 4.2 to validate the released build on hardware via a local west build.
 
 ```AskQuestion:
-  prompt: "Release published. Run Phase 4.2 Validation with the pre-built firmware?"
+  prompt: "Release published. Run Phase 4.2 Validation on hardware?"
   options:
-    - "Yes — load chsh-sk-ncs-4.2-validation (will download and flash pre-built artifact)"
+    - "Yes — load chsh-sk-ncs-4.2-validation (validates the released build via a local west build)"
     - "No — release is done"
 ```
 
@@ -141,7 +141,7 @@ Release published with pre-built firmware artifact available. Hand off to Phase 
 When CI is failing, iterate:
 
 ```
-edit → commit (chsh-sk-git) → push → gh run watch
+edit → commit (chsh-sk-ncs-3.4-git-commit) → push → gh run watch
   → (fail) → gh run view --log-failed → fix → repeat
   → (pass) → AskQuestion (Step 4) → load chsh-sk-ncs-4.2-validation → done
 ```
@@ -153,14 +153,11 @@ edit → commit (chsh-sk-git) → push → gh run watch
 | Task | Skill |
 |------|-------|
 | Commit before pushing | `chsh-sk-ncs-3.4-git-commit` |
-| Hardware validation with pre-built firmware | `chsh-sk-ncs-4.2-validation` |
+| Validate the released build on hardware (local west build) | `chsh-sk-ncs-4.2-validation` |
 | Debug CI failures, UART capture | `chsh-sk-ncs-3.2-debug` (Mode G) |
 | Build commands, toolchain | `chsh-sk-ncs-env` |
 
 ---
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

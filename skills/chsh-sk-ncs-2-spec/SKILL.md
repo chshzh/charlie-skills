@@ -16,7 +16,7 @@ User request
   │
   ▼
 Step 0: Detect context
-  ├─ No specs exist ────────────────────────→ [A] New Design        (A1–A8)
+  ├─ No specs exist ────────────────────────→ [A] New Design        (A1–A3, A6–A8)
   ├─ Specs exist + PRD has newer revision ────→ [B] Update Specs      (B1–B4)
   └─ Code exists, no specs ───────────────→ [C] Reverse Design
                             │
@@ -29,7 +29,7 @@ Step 0: Detect context
 
 ---
 
-> **Knowledge sources**: Use `mcp_nordic-mcp_nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
+> **Knowledge sources**: Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` before specifying board targets, peripheral names, or Kconfig symbols — never hardcode these from memory.
 
 ## Step 0 — Detect Context
 
@@ -44,7 +44,7 @@ git log --oneline -5                             # recent commits
 | Condition | Mode |
 |-----------|------|
 | No specs exist | **A — New Design** |
-| Specs exist, PRD has newer revision (check Revision History table) | **B — Update Specs** |
+| Specs exist, PRD has newer revision (check Changelog table) | **B — Update Specs** |
 | Code exists, no specs → document what is built | **C — Reverse Design** |
 
 Ask the user to confirm the mode before proceeding.
@@ -151,7 +151,7 @@ Choose the observer type that matches the work performed by each module:
 
 > **Anti-pattern**: calling `k_sleep()` or `http_server_start()` inside a `ZBUS_LISTENER` callback blocks the publisher's thread (e.g. the `net_mgmt` thread) for the entire duration. Use `k_work_schedule(&work, K_MSEC(delay))` from the listener instead.
 
-Add the revision history entry (version 1.0, today's date).
+Add the changelog entry (initial version, today's date).
 
 ### A6b. Generate `docs/dev-specs/2-dts-partition.md`
 
@@ -172,6 +172,8 @@ Add the changelog entry (initial version, today's date).
 ### A6c. Generate `docs/dev-specs/3-memopt.md`
 
 Always required. Documents the memory budget and optimization history for the project.
+
+> At design time this is the initial estimate. `chsh-sk-ncs-3.3-memopt` is the single writer of measured values and **updates this same file** (`docs/dev-specs/3-memopt.md`) after a build — do not create a separate report.
 
 Use `3-MEMOPT_TEMPLATE.md` as the base. Fill in:
 
@@ -237,8 +239,8 @@ Use when the PRD has a newer revision entry than the latest spec revision.
 
 ### B1. Identify the delta
 
-1. Read the PRD's **Revision History** table — note the new entries since the last spec update.
-2. Read each spec's **Revision History** table — note its current version date.
+1. Read the PRD's **Changelog** table — note the new entries since the last spec update.
+2. Read each spec's **Changelog** table — note its current version date.
 3. For each FR in the PRD, check which spec covers it and whether the spec's acceptance criteria still match.
 4. Present the gap table to the user:
 
@@ -266,7 +268,7 @@ For each impacted spec file:
 - Apply the PRD change to the relevant section (state machine, Kconfig, API, etc.).
 - Add a new row to the spec's **Changelog** table (its version cell = the `Version` field = now):
   `| <now> | Updated to PRD v<prd-version>: <summary of change> |`
-- If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`. Select the module type first:
+- If a module is newly added, generate its spec from `MODULE_TEMPLATE.md`, selecting the module type per A7 (application module with SMF+Zbus, or library wrapper `app_<lib>/`).
 - If a module is removed, mark it `[DEPRECATED]` in the header; do not delete.
 
 ### B3. Update `1-architecture.md` and `0-overview.md`
@@ -303,7 +305,7 @@ Use when code exists but no specs have been written.
    - State machine (if SMF)
    - Kconfig symbols
    - Public functions
-3. Generate specs as in Mode A4–A5 using the code as the source of truth.
+3. Generate specs as in A3 (`0-overview.md`) and A7 (per-module specs) using the code as the source of truth.
 4. Generate `1-architecture.md` from the discovered structure.
 5. Generate `3-memopt.md` from build map files and ZView stack data if available.
 6. Note any undocumented behaviours or gaps as **Open Issues**.
@@ -346,7 +348,8 @@ Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
 - [ ] All Zbus channels are listed with publisher, subscriber(s), and message struct
 
 ### Document Information (every spec)
-- [ ] DI table matches the template exactly (`Project, Version, PRD Version, NCS Version, Target Board(s), Status`); `Version` is the current edit time and is not equal to `PRD Version`
+- [ ] DI table matches **its own template's** Document Information section exactly (each template owns its DI schema — e.g. `3-MEMOPT_TEMPLATE.md` has `Method` and no `PRD Version`)
+- [ ] Where the template defines a `Version` field, it is the current edit time; where it also defines `PRD Version`, the two are not equal
 
 ### Implementability (the "no-ask" test)
 - [ ] A developer could write all source files using only the specs — no PRD re-reading needed

@@ -98,7 +98,7 @@ Agent skills are reusable procedure files (`SKILL.md`) the agent reads before ex
 | Debug WiFi / firmware crash | `chsh-sk-ncs-3.2-debug` |
 | NCS version upgrade | `chsh-sk-ncs-migrate` |
 | Memfault OTA release | `chsh-sk-memfault` |
-| Git commit / push | `chsh-sk-git-commit` |
+| Git commit / push | `chsh-sk-ncs-3.4-git` |
 | New NCS feature → code | `chsh-sk-ncs-0-workflow` |
 | Hardware validation tests | `chsh-sk-ncs-4.2-validation` |
 

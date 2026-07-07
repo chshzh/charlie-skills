@@ -12,10 +12,10 @@ description: >-
 Implements NCS firmware from the engineering specs in `docs/dev-specs/`.
 Uses two real project repositories as reference implementations.
 
-> **Prerequisite**: `docs/dev-specs/architecture.md` and at least one module
+> **Prerequisite**: `docs/dev-specs/1-architecture.md` and at least one module
 > spec must exist. If specs are missing, run **chsh-sk-ncs-2-spec** first.
 
-> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` to load `embedded-code-guidance-ncs-zephyr` — covers NCS code style, Kconfig patterns, and driver idioms. Use `mcp_nordic-mcp_nordicsemi_search_sources` for API lookups, board targets, and driver symbol names.
+> **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` to load `embedded-code-guidance-ncs-zephyr` — covers NCS code style, Kconfig patterns, and driver idioms. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` for API lookups, board targets, and driver symbol names.
 
 ---
 
@@ -28,15 +28,16 @@ Before writing any code, browse both repos to understand the patterns in use:
 | [`nordic-wifi-webdash`](https://github.com/chshzh/nordic-wifi-webdash) | **SMF+Zbus** modular architecture, multi-mode Wi-Fi (SoftAP/STA/P2P_GO/P2P_CLIENT), `mode_selector` NVS+shell pattern, HTTP webserver with gzip static assets from flash, REST API design, event-triggered service start on zbus (`CLIENT_CONNECTED_CHAN`) |
 | [`nordic-wifi-memfault`](https://github.com/chshzh/nordic-wifi-memfault) | **SYS_INIT+Zbus** event-driven modules (no SMF), Memfault metrics/coredump/OTA, BLE Wi-Fi credential provisioning, NTP time sync, disconnect-time log persist to external flash, optional MQTT/HTTPS/CDR modules via Kconfig flags, button-driven debug flows |
 
-Use the `github_repo` or `fetch_webpage` tool to read specific files from these
-repos when implementing a similar module.
+Use the `gh` CLI to read specific files from these public repos when
+implementing a similar module (e.g.
+`gh api repos/chshzh/nordic-wifi-webdash/contents/<path> --jq '.content' | base64 -d`).
 
 ---
 
 ## Step 0 — Read Inputs
 
 ```bash
-cat docs/dev-specs/architecture.md   # module map, Zbus channels, boot order
+cat docs/dev-specs/1-architecture.md   # module map, Zbus channels, boot order
 ls docs/dev-specs/                   # all module specs
 git log --oneline -5                 # recent commits
 ls src/modules/ 2>/dev/null          # existing modules
@@ -96,7 +97,7 @@ For each module from the spec:
    # Track which PRD and specs revision this code was written against.
    # Copy the newest Changelog timestamp from each document.
    CONFIG_ZEGO_APP_PRD_VERSION="YYYY-MM-DD-HH-MM"    # from docs/pm-prd/PRD.md Changelog
-   CONFIG_ZEGO_APP_SPECS_VERSION="YYYY-MM-DD-HH-MM"  # from docs/dev-specs/overview.md Changelog
+   CONFIG_ZEGO_APP_SPECS_VERSION="YYYY-MM-DD-HH-MM"  # from docs/dev-specs/0-overview.md Changelog
    ```
    Update these values every time the code is re-synced to a new PRD or specs revision.
    They appear in the boot banner as `PRD: ...` and `Specs: ...`.
@@ -120,8 +121,9 @@ For each module from the spec:
    - If `APP_VERSION_STRING` is not used in the app's `CMakeLists.txt`, remove the version-injection block from the Build step.
 
 6. Handoff:
-   > "Implementation complete. Run **chsh-sk-ncs-4.1-verification** for Phase 4
-   > Verification & Test (static review + hardware validation)."
+   > "Implementation complete. Run **chsh-sk-ncs-4.1-verification** for Phase 4.1
+   > Verification (code review, clean build, doc audit — no hardware); then run
+   > **chsh-sk-ncs-4.2-validation** for hardware validation."
 
 ---
 

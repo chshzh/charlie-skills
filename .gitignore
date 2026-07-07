@@ -34,6 +34,23 @@ remote-settings.json
 .last-cleanup
 plugins/.last_inuse_sweep
 
+# Repo scope: this repo only tracks agents/, skills/, CLAUDE.md, README.md, .gitignore.
+# Everything else below is local state/config kept on disk but not versioned here.
+/.claude/
+/.claude.json.backup
+/.mcp.json
+/daemon/
+/daemon-auth-cooldown
+/daemon-auth-status.json
+/daemon.log
+/jobs/
+/telemetry/
+/settings.json
+/settings.json.bak*
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/claude-hud/
+
 # Skills — first-run user config files (may contain API keys, server addresses)
 skills/**/config.json
 

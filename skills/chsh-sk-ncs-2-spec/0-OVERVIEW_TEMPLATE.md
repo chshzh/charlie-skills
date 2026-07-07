@@ -66,7 +66,7 @@ For the product requirements that drive this design, see `docs/pm-prd/PRD.md`.
 |----------------|-----------|--------|
 | FR-001 <title> | <module>.md | Specified / TBD |
 | FR-002 <title> | <module>.md | Specified / TBD |
-| NFR-001 <title> | architecture.md | Specified / TBD |
+| NFR-001 <title> | 1-architecture.md | Specified / TBD |
 
 ---
 

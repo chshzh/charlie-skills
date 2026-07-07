@@ -6,7 +6,7 @@ description: Use when creating a new PRD, adding or changing a feature, or synci
 # chsh-sk-ncs-1-prd — Interactive PRD Workflow
 
 This skill is for the **Product Manager** role. It asks questions in plain language
-and maintains a single `PRD.md` in `docs/` with a built-in revision history table.
+and maintains a single `PRD.md` in `docs/` with a built-in Changelog table.
 
 No Kconfig, no Flash/RAM numbers, no architecture diagrams — those are for the engineer.
 The PRD answers: **What should this device do, for whom, and how should it behave?**
@@ -43,7 +43,7 @@ Step 0: Detect state
 Check what exists in the project:
 
 ```bash
-cat docs/pm-prd/PRD.md 2>/dev/null           # existing PRD (check Revision History)
+cat docs/pm-prd/PRD.md 2>/dev/null           # existing PRD (check Changelog)
 git log --oneline -10 -- src/ prj.conf CMakeLists.txt    # recent code changes
 ```
 
@@ -114,6 +114,10 @@ For each board, ask:
 Ask for 3–5 things that prove the product is working well.
 Examples: "connects within 30 seconds", "page loads under 2 seconds", "runs for 24 hours without restart".
 
+For each metric, assign a **Verified by** column:
+- Build-only metrics (compiler errors, `west build -p`) → `**chsh-sk-ncs-4.1-verification** — build verification step`
+- Runtime / hardware metrics (latency, connection time, audio quality) → `**chsh-sk-ncs-4.2-validation** — hardware runtime scenario`
+
 ### A9. Release Criteria
 Ask: which P0 requirements must all pass before the product can be released?
 
@@ -129,7 +133,7 @@ Proceed to **Generate Output**.
 
 ## Mode B — Add Feature
 
-1. Read `docs/pm-prd/PRD.md` and check the current **Revision History**.
+1. Read `docs/pm-prd/PRD.md` and check the current **Changelog**.
 2. Show the current feature list (Sections 2 and 3) as a brief summary.
 3. Ask: *"What feature would you like to add?"*
 4. For the new feature, ask:
@@ -144,7 +148,7 @@ Proceed to **Generate Output**.
 
 ## Mode C — Change Feature
 
-1. Read `docs/pm-prd/PRD.md` and check the current **Revision History**.
+1. Read `docs/pm-prd/PRD.md` and check the current **Changelog**.
 2. List the current functional requirements (FR-xxx) with one-line titles.
 3. Ask: *"Which requirement would you like to change?"*
 4. Show the current text, then ask what should change:
@@ -162,7 +166,7 @@ Use this when the developer has made code changes but the PRD has not been updat
 
 ### D1. Find the gap
 
-Read the **Revision History** table in `docs/pm-prd/PRD.md` to get the last PRD revision date.
+Read the **Changelog** table in `docs/pm-prd/PRD.md` to get the last PRD revision date.
 
 ```bash
 PRD_DATE=<last revision date from table>
@@ -248,8 +252,8 @@ Before handing off, verify the PRD meets these criteria.
 
 ### Completeness
 - [ ] Every FR has at least 2 acceptance criteria that can be tested without reading the code
-- [ ] Success metrics have numeric targets and a measurable method
-- [ ] Assumptions are listed (even obvious ones)
+- [ ] Success metrics have numeric targets, a measurable method, and a **Verified by** column (`chsh-sk-ncs-4.1-verification` or `chsh-sk-ncs-4.2-validation`)
+- [ ] Assumptions are listed (even obvious ones) and sorted High → Medium → Low risk
 - [ ] Out-of-scope items are explicitly named
 - [ ] Release criteria (P0 gate) are listed
 
@@ -278,11 +282,9 @@ Before handing off, verify the PRD meets these criteria.
 |------|-------|
 | Translate PRD to engineering specs | `chsh-sk-ncs-2-spec` |
 | Implement code from specs | `chsh-sk-ncs-3.1-coding` |
-| Generate test report from acceptance criteria | `chsh-sk-ncs-4.1-verification` |
+| Build verification (no hardware) | `chsh-sk-ncs-4.1-verification` |
+| Test report from PRD acceptance criteria (hardware) | `chsh-sk-ncs-4.2-validation` |
 | Full project lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

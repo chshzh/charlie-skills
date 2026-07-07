@@ -28,7 +28,8 @@ BAUD          = 115200
 BOARD_SERIAL  = "0000000000"            # nrfutil serial number
 SSID          = "YOUR_SSID"
 PSK           = "YOUR_PASSWORD"
-KEY_MGMT      = 1                       # 1=WPA2-PSK, 2=WPA3-SAE, 0=open
+KEY_MGMT      = 1                       # 1=WPA2-PSK, 3=WPA3-SAE, 0=open (value passed to 'wifi connect -k')
+RTSCTS        = True                    # board-dependent: True for nRF54LM20DK+nRF7002EB2 / Audio DK; False for nRF7002DK / no-shield boards
 ITERATIONS    = 10
 
 BOOT_TIMEOUT    = 30   # seconds to wait for uart:~$ after reset
@@ -85,7 +86,7 @@ def run_iteration(i: int, port: str, baud: int, sn: str,
     time.sleep(2)
 
     try:
-        ser = serial.Serial(port, baud, rtscts=True, timeout=1)
+        ser = serial.Serial(port, baud, rtscts=RTSCTS, timeout=1)
     except Exception as e:
         return False, f"Serial open failed: {e}"
 

@@ -46,20 +46,22 @@
 
 *How will we know the product is successful?*
 
-| Metric | Target | How to measure |
-|---|---|---|
-| e.g. Dashboard loads | < 2 seconds | Manual test with stopwatch |
-| e.g. Wi-Fi connects | < 30 seconds from power-on | UART log timestamp |
-| e.g. Works without restart | 24 hours | Leave running overnight |
+| Metric | Target | How to measure | Verified by |
+|---|---|---|---|
+| e.g. All builds succeed | Zero compiler errors | `west build -p` on all targets | **chsh-sk-ncs-4.1-verification** — build verification step |
+| e.g. Dashboard loads | < 2 seconds | Manual test with stopwatch | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
+| e.g. Wi-Fi connects | < 30 seconds from power-on | UART log timestamp | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
+| e.g. Works without restart | 24 hours | Leave running overnight | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
 
 ### 1.5 Assumptions
 
-*State the assumptions this PRD is built on. If any of these turn out to be wrong, requirements may need to change.*
+*State the assumptions this PRD is built on. If any of these turn out to be wrong, requirements may need to change. Sort rows High → Medium → Low risk.*
 
 | # | Assumption | Risk if wrong |
 |---|---|---|
 | A1 | e.g. Target users have a phone/laptop with Wi-Fi | High — core connection flow breaks |
 | A2 | e.g. Device is used on a private network | Medium — security requirements may increase |
+| A3 | e.g. Demo environment has no Wi-Fi restrictions | Low — STA mode is the fallback |
 
 ---
 

@@ -81,9 +81,9 @@ Violations:
 
 | Step | Check | Result | Notes |
 |------|-------|--------|-------|
-| A | `overview.md` PRD Version field matches latest PRD Changelog timestamp | ✅ / ❌ | |
+| A | `0-overview.md` PRD Version field matches latest PRD Changelog timestamp | ✅ / ❌ | |
 | A | All FR/NFR items in PRD traceable to spec | ✅ / ❌ | |
-| B | `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` matches `overview.md` latest Changelog | ✅ / ❌ | |
+| B | `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` matches `0-overview.md` latest Changelog | ✅ / ❌ | |
 | B | `CONFIG_ZEGO_APP_PRD_VERSION` in `prj.conf` matches PRD latest Changelog | ✅ / ❌ | |
 | B | Spec modules have `src/modules/<name>/` counterparts | ✅ / ❌ | |
 | C | README features match current PRD FR list | ✅ / ❌ | |

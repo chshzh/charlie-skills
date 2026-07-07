@@ -68,13 +68,17 @@ PSP, and RESETREAS before the reboot. Revert both changes after the fault is dia
 **Always use the Zephyr SDK `addr2line` — NOT `arm-none-eabi-addr2line`:**
 
 ```bash
-# NCS v3.3.0 macOS toolchain path
-ADDR2LINE="/opt/nordic/ncs/toolchains/0c0f19d91c/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-addr2line"
-ELF="<app>/build_<board>/zephyr/zephyr.elf"
+# Launch the toolchain's addr2line via the nrfutil wrapper (no hardcoded hash path —
+# the toolchain hash varies per NCS version/machine; see C3).
+# Sysbuild caveat: the top-level build_<board>/zephyr/ has only merged_*.hex; the app's
+# own symbols live in the per-app sub-domain build_<board>/<app>/zephyr/zephyr.elf.
+ELF="<app>/build_<board>/<app>/zephyr/zephyr.elf"
 
 # Decode faulting instruction (PC) and calling function (LR)
-$ADDR2LINE -e $ELF -f -p <PC_HEX>
-$ADDR2LINE -e $ELF -f -p <LR_HEX>
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
+  arm-zephyr-eabi-addr2line -e $ELF -f -p <PC_HEX>
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
+  arm-zephyr-eabi-addr2line -e $ELF -f -p <LR_HEX>
 ```
 
 **Identify crashing thread from PSP** using the map file:
@@ -82,7 +86,7 @@ $ADDR2LINE -e $ELF -f -p <LR_HEX>
 ```python
 import re
 
-MAP = "<app>/build_<board>/zephyr/zephyr.map"
+MAP = "<app>/build_<board>/<app>/zephyr/zephyr.map"   # per-app sub-domain (sysbuild)
 PSP = 0x<psp_from_fault_dump>          # e.g. 0x20050570
 
 stacks = []

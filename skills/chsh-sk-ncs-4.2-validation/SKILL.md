@@ -32,7 +32,7 @@ Two living documents (fixed names, internal Changelog — like `PRD.md`/`archite
 1. **Check inputs**:
    ```bash
    cat docs/pm-prd/PRD.md            # acceptance criteria source (note Changelog version)
-   ls docs/dev-specs/overview.md     # spec version reference
+   ls docs/dev-specs/0-overview.md   # spec version reference
    nrfutil device list               # which boards are ACTUALLY connected + serial numbers
    ```
    Don't assume a fixed board set — the user plugs in different DKs per run.
@@ -117,6 +117,10 @@ nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
 # --recover / --erase wipe NVS + Wi-Fi creds — only for first flash or after AP-protect erase.
 ```
 
+> **For [ZView] rounds, flash an instrumented build, not the production image.** Before this
+> Flash step, rebuild with `-DEXTRA_CONF_FILE=overlay-zview.conf` (see the ZView **Prerequisite**
+> block below) and flash that build — otherwise `west zview dump` returns empty threads/heaps.
+
 ### Drive the test (shell-first)
 
 Delegate serial to **`chsh-ag-terminal`** — never drive pyserial directly. Follow
@@ -158,18 +162,22 @@ If `west zview dump` returns empty threads/heaps, the build is missing these —
 ```bash
 # 1. Start a recording over the full high-memory round (run in background while the shell drives load)
 #    Pass -s <SN> to avoid the probe-selection dialog (get S/N with: nrfutil device list)
-west zview record -e build_<board>/<app>/zephyr/zephyr.elf -r jlink -t <target> -s <SN> \
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
+  west zview record -e build_<board>/<app>/zephyr/zephyr.elf -r jlink -t <target> -s <SN> \
   -o /tmp/zview_<board>.ndjson.gz --duration <round_seconds>
 
 # 2. Drive the high-memory stimulus over UART/shell concurrently
 #    (concurrent TLS/HTTPS + MQTT, OTA download, coredump capture+upload, large log flush)
 
-# 3. Extract peak watermarks from the recording (stderr=status, stdout=clean JSON for jq)
-west zview dump -i /tmp/zview_<board>.ndjson.gz --frame <peak> --json \
+# 3. Extract peak watermarks from the recording (stderr=status, stdout=clean JSON for jq).
+#    Watermarks are cumulative high-water marks, so the peak is the LAST frame: --frame last.
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
+  west zview dump -i /tmp/zview_<board>.ndjson.gz --frame last --json \
   | jq '.threads[] | {name, alloc:.stack_size, watermark:.runtime.stack_watermark_percent}'
-west zview dump -i /tmp/zview_<board>.ndjson.gz --frame <peak> --json | jq '.heaps'
+nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
+  west zview dump -i /tmp/zview_<board>.ndjson.gz --frame last --json | jq '.heaps'
 ```
-Or a single live frame: `west zview dump -e <elf> -r jlink -t <target> -s <SN> --json`.
+Or a single live frame: `nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- west zview dump -e <elf> -r jlink -t <target> -s <SN> --json`.
 J-Link targets: nRF7002DK → `nRF5340_xxAA`; nRF54LM20DK → `nRF54LM20A_M33`.
 For interactive watching, see `chsh-sk-ncs-3.3-memopt` → **Live ZView**.
 Record the per-board peak thread stacks (name, Kconfig symbol, peak/alloc, %) and heap peaks
@@ -237,7 +245,6 @@ After reporting, ask:
 ## Gotchas
 - ZView returns empty threads/heaps → build missing `CONFIG_INIT_STACKS` / `THREAD_MONITOR` / `THREAD_STACK_INFO`; rebuild with `overlay-zview.conf`.
 - A thread inactive during the ZView round (e.g. OTA downloader never fired) has no true peak — flag it so 3.3 keeps the prior value.
-- TODO: add one entry per real observed failure or routing false-positive.
 
 ## Self-Update Policy
 

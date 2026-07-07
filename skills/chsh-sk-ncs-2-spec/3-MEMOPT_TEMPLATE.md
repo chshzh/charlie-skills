@@ -28,9 +28,8 @@
 
 | Resource | Formula | Headroom |
 |----------|---------|---------|
-| Thread stacks (watermark < 5120 B) | `ceil(watermark / 0.8)` | 20 % |
-| Thread stacks (watermark ≥ 5120 B) | `ceil(watermark / 0.9)` | 10 % |
-| Heaps | `ceil(peak / 0.8)` | 20 % |
+| Thread stacks | `floor(watermark / 0.9)` | 10 % |
+| Heaps | `floor(peak / 0.8)` | 20 % |
 
 `NET_RX_STACK_SIZE` and `NET_TX_STACK_SIZE` are kept at the Zephyr default (2048 B) regardless
 of measurement to absorb network burst spikes.
@@ -54,7 +53,7 @@ of measurement to absorb network burst spikes.
 
 | Thread / WQ | Kconfig | <Board A> watermark (B) | <Board B> watermark (B) | Worst-case | Rule | New size | Old size | Δ (B) |
 |-------------|---------|------------------------|------------------------|------------|------|----------|----------|-------|
-| `sysworkq` | `SYSTEM_WORKQUEUE_STACK_SIZE` | — | — | — | ÷0.8 | | | |
+| `sysworkq` | `SYSTEM_WORKQUEUE_STACK_SIZE` | — | — | — | ÷0.9 | | | |
 | `main` | `MAIN_STACK_SIZE` | — | — | — | ÷0.9 | | | |
 | *(add threads)* | | | | | | | | |
 | `rx_q` | `NET_RX_STACK_SIZE` | — | — | — | kept | 2048 | 2048 | 0 |

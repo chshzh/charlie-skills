@@ -11,7 +11,7 @@ Covers the full range from simple UART log capture to co-processor barrier synch
 > **Prerequisite**: A working NCS toolchain (`nrfutil sdk-manager`) and at least one connected Nordic board.
 > If not set up, run **chsh-sk-ncs-env** first.
 
-> **Knowledge sources**: Always call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start
+> **Knowledge sources**: Always call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` at the start
 > of any debug session to load the `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and
 > `embedded-code-guidance-ncs-zephyr` resources into context.
 
@@ -76,7 +76,7 @@ Before investigating any failure, collect and document:
 ```bash
 nrfutil device list          # connected boards + serial numbers
 west boards | grep <soc>     # available board targets
-cat docs/dev-specs/overview.md 2>/dev/null | head -10  # specs version
+cat docs/dev-specs/0-overview.md 2>/dev/null | head -10  # specs version
 git -C <app> log --oneline -3  # recent changes
 ```
 
@@ -158,11 +158,13 @@ touch "$NCS_LOG"
 echo "Session log: $NCS_LOG"
 ```
 
-**2. Print this block in your chat response so the developer can open it:**
+**2. Print this block in your chat response so the developer can open it.**
+Substitute the real `$NCS_LOG` filename from step 1 in place of the placeholder —
+do NOT print the literal `<timestamp>`:
 
 > **Live monitoring:** Open a new terminal tab and run:
 > ```bash
-> tail -f /tmp/ncs_debug_<timestamp>.log
+> tail -f /tmp/ncs_debug_20260626_143022.log   # ← your actual $NCS_LOG from step 1
 > ```
 > All serial output streams here as the agent captures it.
 
@@ -456,7 +458,10 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 |------|-------|
 | Serial terminal — capture logs, send commands, loop test | `chsh-ag-terminal` subagent |
 | First-time NCS setup | `chsh-sk-ncs-env` |
-| Optimize RAM/Flash | `chsh-sk-ncs-3.3-memopt` || Review expected module behavior from spec | `chsh-sk-ncs-2-spec` || Phase 4 Verification & Test (static + EEDP hardware) | `chsh-sk-ncs-4.1-verification` |
+| Optimize RAM/Flash | `chsh-sk-ncs-3.3-memopt` |
+| Review expected module behavior from spec | `chsh-sk-ncs-2-spec` |
+| Phase 4.1 static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4.1-verification` |
+| Phase 4.2 hardware/EEDP runtime re-verification | `chsh-sk-ncs-4.2-validation` |
 | EEDP platform setup + all modules | [`references/eedp-platform.md`](references/eedp-platform.md) · wiki: `eedp-platform` |
 | Commit after fixing | `chsh-sk-ncs-3.4-git-commit` |
 | Tag and publish a release after CI passes | `chsh-sk-ncs-3.5-release` |

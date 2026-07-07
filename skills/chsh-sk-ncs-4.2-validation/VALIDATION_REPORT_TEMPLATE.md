@@ -113,7 +113,8 @@ Serial:       /dev/tty.usbmodem…1  @ 115200  rtscts=True    (shell on)
 >
 > Capture: `west zview record -e build_<board>/<app>/zephyr/zephyr.elf -r jlink -t <target> -o cap.ndjson.gz --duration <N>`
 > (J-Link targets: nRF7002DK → `nRF5340_xxAA`, nRF54LM20DK → `nRF54LM20A_M33`)
-> then `west zview dump -i cap.ndjson.gz --frame <peak> --json`. Producing round: **R_**.
+> then `west zview dump -i cap.ndjson.gz --frame last --json` (watermarks are cumulative high-water
+> marks, so the peak is the last frame). Producing round: **R_**.
 
 ### Thread Stacks — peak usage
 

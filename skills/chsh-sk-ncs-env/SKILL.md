@@ -17,7 +17,7 @@ These can differ! Example: NCS main branch + v3.2.1 toolchain.
 
 **ALWAYS check if the NCS environment is set up before running any `west` command.**
 
-> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` for board targets, VCOM ports, and Kconfig symbols — never hardcode these.
+> **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual`, `nordicsemi_uart_monitor.py`, and `embedded-code-guidance-ncs-zephyr`. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` for board targets, VCOM ports, and Kconfig symbols — never hardcode these.
 
 ## nrfutil Command Wrapper (Preferred)
 
@@ -68,6 +68,9 @@ List all valid targets: `west boards` (inside the toolchain environment).
 - **Always pass `-d <path-to-app>/build`** to keep build artifacts inside the app folder.
 - Pass `-d` explicitly when running outside the app directory to avoid creating `build/` in cwd.
 - Use `-p` (pristine) whenever the board, sysbuild config, overlays, or toolchain changed.
+- Hardware validation and memory optimization keep one build per board in `build_<board>/`
+  (e.g. `build_nrf7002dk`). Whatever `-d <dir>` you use at build time, the same `<dir>` must be
+  passed to later `west flash` / measurement steps — they read artifacts from that exact path.
 
 ## Workflow for West Commands
 
@@ -98,12 +101,13 @@ Example question: "Which toolchain version would you like to use? (e.g., v3.2.1)
 
 1. Look up the toolchain bundle ID using the **toolchain version**:
    ```sh
-   jq -r '.toolchains[] | select(.ncs_versions[]=="<TOOLCHAIN_VERSION>").identifier.bundle_id' /opt/nordic/ncs/toolchains/toolchains.json
+   jq -r '.[].toolchains[] | select(.ncs_versions[]=="<TOOLCHAIN_VERSION>").identifier.bundle_id' /opt/nordic/ncs/toolchains/toolchains.json
    ```
 
 2. Export PATH, GIT_EXEC_PATH, and source Zephyr environment from the **SDK path**:
    ```sh
-   BUNDLE_ID="$(jq -r '.toolchains[] | select(.ncs_versions[]=="<TOOLCHAIN_VERSION>").identifier.bundle_id' /opt/nordic/ncs/toolchains/toolchains.json)"
+   BUNDLE_ID="$(jq -r '.[].toolchains[] | select(.ncs_versions[]=="<TOOLCHAIN_VERSION>").identifier.bundle_id' /opt/nordic/ncs/toolchains/toolchains.json)"
+   [ -z "$BUNDLE_ID" ] && echo "bundle id not found for <TOOLCHAIN_VERSION>" >&2
    export PATH="/opt/nordic/ncs/toolchains/${BUNDLE_ID}/bin:$PATH"
    export GIT_EXEC_PATH=$(ls -d /opt/nordic/ncs/toolchains/${BUNDLE_ID}/Cellar/git/*/libexec/git-core)
    source <SDK_PATH>/zephyr/zephyr-env.sh
@@ -162,6 +166,8 @@ Never force `--no-sysbuild` on a project that ships `sysbuild.conf` without chec
 
 | Toolchain Version | Bundle ID   |
 |-------------------|-------------|
+| v3.4.0            | ccc010f809  |
+| v3.3.0            | 0c0f19d91c  |
 | v3.2.4            | 185bb0e3b6  |
 | v3.2.0, v3.2.1    | 322ac893fe  |
 | v3.1.1            | 561dce9adf  |
@@ -316,16 +322,16 @@ Inside the off/on block you can keep the `checkpatch`-approved layout (same-line
    <SDK_PATH>/zephyr/scripts/west_commands/runners/nrf_common.py
    ```
 
-2. Find the `_op_program` method (around line 460)
+2. Find the `_op_program` method (search the file for `_op_program`; the line number
+   varies by SDK version)
 
-3. Change the verification option:
+3. Change the verification option to `VERIFY_NONE`:
    ```python
-   # Before:
-   'options': {'chip_erase_mode': erase, 'verify': 'VERIFY_READ'}
-   
-   # After:
    'options': {'chip_erase_mode': erase, 'verify': 'VERIFY_NONE'}
    ```
+
+   > **Note:** Recent SDKs (v3.3.0+) already ship `VERIFY_NONE` here — if so, no edit is
+   > needed. Only change it if you find a different `verify` value (e.g. `VERIFY_READ`).
 
 **Example path for v3.2.1:**
 ```
@@ -431,9 +437,6 @@ If the port opens but no data appears after a board reset, the terminal tool is 
 - Prompt may not change after PATH export; rely on the explicit bundle/version you set
 - To switch versions, repeat setup with new bundle ID and/or SDK path (no terminal restart needed)
 - When user says "NCS v3.2.1", clarify if they mean toolchain, SDK, or both
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

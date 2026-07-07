@@ -11,11 +11,17 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 2. **Build Release mode** for accurate Flash measurements (Debug builds are larger)
 3. **Measure before optimizing** — Thread Analyzer and `heap_monitor` first
 
-> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
+> **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
 
 ---
 
 ## Workflow
+
+> **Output: `docs/dev-specs/3-memopt.md`** — this skill is the single writer of that file. The
+> design phase (`chsh-sk-ncs-2-spec`) first generates `3-memopt.md` as a sizing spec; here you
+> **update the same file** in place with measured watermarks and the `prj.conf` changes applied,
+> using `MEMOPT_REPORT_TEMPLATE.md` as the content template. Do not create a separate
+> `MEMOPT_REPORT.md`.
 
 ### Step 0 — Prefer the validation report as the sizing input
 
@@ -47,8 +53,12 @@ west build -t ram_report    # RAM usage by symbol
 west build -t puncover      # Interactive HTML visualization
 ```
 
+This project builds with **sysbuild**, so the application ELF is under the project-named
+sub-image directory, not the top-level `zephyr/` (which only holds `merged_*.hex`). Substitute
+your own app name for `<app>`:
+
 ```sh
-arm-none-eabi-nm --size-sort -S build/zephyr/zephyr.elf | tail -20
+arm-none-eabi-nm --size-sort -S build_<board>/<app>/zephyr/zephyr.elf | tail -20
 ```
 
 ### Step 2 — Identify hotspots
@@ -93,6 +103,9 @@ sub-image directory, not the top-level `zephyr/`:
 |-------|---------------|-----|
 | nRF7002DK (nRF5340) | `nRF5340_xxAA` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf` |
 | nRF54LM20DK | `nRF54LM20A_M33` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf` |
+
+> The ELF paths above use `nordic-wifi-memfault` as a worked example — substitute your own app
+> name (`build_<board>/<app>/zephyr/zephyr.elf`).
 
 > Prerequisite Kconfig in the build: `CONFIG_INIT_STACKS=y`, `CONFIG_THREAD_MONITOR=y`,
 > `CONFIG_THREAD_STACK_INFO=y` (+ `CONFIG_SYS_HEAP_RUNTIME_STATS=y` for heap, `CONFIG_THREAD_NAME=y`
@@ -224,7 +237,7 @@ grep "HEAP_MEM_POOL_ADD_SIZE" build/zephyr/.config
 1. Enable `heap_monitor` module (copy from `ncs-project-logo`, see [reference/heap-monitor.md](reference/heap-monitor.md))
 2. Flash and exercise all code paths on **all target boards**
 3. Read the `peak=` field from UART logs — **not** `used=` (live snapshot). Use the worst-case peak across all boards.
-4. Production heap = `floor(peak / 0.8)` minimum (1.25× headroom); 1.5× if flash budget allows
+4. Production heap = `floor(peak / 0.8)` minimum (20% headroom, ×1.25 of peak); 1.5× if flash budget allows
 
 ```
 <inf> heap_monitor: System Heap: used=51712/98304 (52%) peak=64752/98304 (65%)
@@ -234,8 +247,8 @@ grep "HEAP_MEM_POOL_ADD_SIZE" build/zephyr/.config
 Formula with embedded rationale in `prj.conf`:
 
 ```
-# Max usage 57928/0.8=72410
-CONFIG_HEAP_MEM_POOL_SIZE=72410
+# Max usage 86500/0.8=108125
+CONFIG_HEAP_MEM_POOL_SIZE=108125
 ```
 
 > ⚠ If `peak` is above 85 % of the current ceiling you are one allocation spike away from exhaustion — raise the ceiling before the next measurement cycle.
@@ -269,12 +282,19 @@ Create `pm_static.yml` (or `pm_static_<board>.yml`) for custom partition sizes.
 
 - [reference/heap-monitor.md](reference/heap-monitor.md) — heap monitor module, tuning knobs, log format, Memfault integration, heap architecture (system / net buffers / mbedTLS)
 - [reference/optimization-configs.md](reference/optimization-configs.md) — full Flash/RAM config options, development vs production templates, profiling tools
-- [MEMOPT_REPORT_TEMPLATE.md](MEMOPT_REPORT_TEMPLATE.md) — base for `MEMOPT_REPORT.md`; documents measured watermarks, sizing math, and the `prj.conf` changes applied (consumes `VALIDATION_REPORT.md` when present)
+- [MEMOPT_REPORT_TEMPLATE.md](MEMOPT_REPORT_TEMPLATE.md) — content template for `docs/dev-specs/3-memopt.md`; documents measured watermarks, sizing math, and the `prj.conf` changes applied (consumes `VALIDATION_REPORT.md` when present)
 
 ---
 
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
+## Handoff
+
+After applying sizing changes to `prj.conf` / `pm_static.yml` and updating
+`docs/dev-specs/3-memopt.md`, close the loop:
+
+- **Re-validate on hardware** — `chsh-sk-ncs-4.2-validation` (re-capture watermarks under
+  worst-case load to confirm the new sizes hold).
+- **Re-verify clean build** — `chsh-sk-ncs-4.1-verification` (code review, clean build, doc audit).
+- **Commit** — `chsh-sk-ncs-3.4-git-commit`.
 
 ## Self-Update Policy
 

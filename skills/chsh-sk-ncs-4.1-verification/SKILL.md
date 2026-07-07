@@ -14,11 +14,13 @@ can run in CI.
 ```
 4.1 Verification
 ├── Code review (structure, config, standards)
+├── Code format check (clang-format --dry-run)
 ├── Build verification (README "### Build" commands only)
+├── PRD satisfaction check (FR-by-FR code reading)
 └── Documentation consistency audit
 ```
 
-> **Knowledge sources**: Call `mcp_nordic-mcp_nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp_nordic-mcp_nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
+> **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` before checking any Kconfig symbol or board capability.
 
 **Output**: `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md`
 
@@ -28,11 +30,11 @@ can run in CI.
 
 ```bash
 # Extract version chain — record all three before proceeding
-# PRD_VERSION: last timestamp row in the PRD Changelog table
-grep -E "^\| [0-9]{4}" docs/pm-prd/PRD.md | tail -1
+# PRD_VERSION: newest timestamp row in the PRD Changelog table
+awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/pm-prd/PRD.md | sort | tail -1
 
-# SPECS_VERSION: last timestamp row in overview.md Changelog table
-grep -E "^\| [0-9]{4}" docs/dev-specs/overview.md | tail -1
+# SPECS_VERSION: newest timestamp row in 0-overview.md Changelog table
+awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/dev-specs/0-overview.md | sort | tail -1
 
 # Code version: prj.conf carries both version tags
 grep -E "ZEGO_APP_(PRD|SPECS)_VERSION" prj.conf
@@ -43,12 +45,12 @@ git status --short                                         # check for uncommitt
 grep -n "^### Build" README.md                            # locate canonical build commands
 ```
 
-Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest overview.md Changelog entry), and the version tags in `prj.conf` — all three go into every report header.
+Record `PRD_VERSION` (latest PRD Changelog entry), `SPECS_VERSION` (latest 0-overview.md Changelog entry), and the version tags in `prj.conf` — all three go into every report header.
 
 > **Note on uncommitted changes**: if `git status` shows modified source files, the code version is ahead of the last commit. Build and test anyway — but note in the report that the build reflects uncommitted state. The version chain must satisfy:
 
 ```
-PRD_VERSION  →  specs/overview.md written against PRD_VERSION
+PRD_VERSION  →  specs/0-overview.md written against PRD_VERSION
                   ↓
              SPECS_VERSION  →  src/main.c SPECS_VERSION tag matches
                                   ↓
@@ -66,7 +68,7 @@ No hardware required. Can be run independently at any point.
 Inspect each area below. Flag each finding with severity (P0 / P1 / P2).
 
 **Structure**
-- `src/modules/` layout matches `docs/dev-specs/architecture.md`
+- `src/modules/` layout matches `docs/dev-specs/1-architecture.md`
 - Required top-level files present: `CMakeLists.txt`, `Kconfig`, `prj.conf`
 - No hardcoded paths in `CMakeLists.txt`; modules gated by `CONFIG_APP_*`
 
@@ -91,7 +93,19 @@ Inspect each area below. Flag each finding with severity (P0 / P1 / P2).
 | HTTP instead of HTTPS | MQTT/HTTP URLs in code | All remote endpoints TLS (`mqtts://`, 8883/443) |
 | Memfault project key in source | `prj.conf`, `*.c` | Key only via `CONFIG_MEMFAULT_NCS_PROJECT_KEY` |
 
-### 4.1.2 Build Verification
+### 4.1.2 Code Format Check
+
+Run clang-format in check mode over the project sources using the NCS toolchain binary (never system clang-format). This feeds the **`## 2. Code Format`** report section.
+
+```bash
+# Dry-run only — report violations, do not rewrite files here.
+# Use the NCS toolchain launcher (see chsh-sk-ncs-clang-format for the exact binary).
+find src -name '*.c' -o -name '*.h' | xargs clang-format --dry-run --Werror
+```
+
+Record each file with violations. Clean = ✅; any violation = ⚠️ (P2). For auto-fixing, route to `chsh-sk-ncs-clang-format`.
+
+### 4.1.3 Build Verification
 
 **Build command policy (strict):**
 - Use only the commands listed in the application's `README.md` under `### Build`.
@@ -112,30 +126,45 @@ Zero **compiler** warnings required. Record binary size. Any compiler warning = 
 
 > **Known non-P1 Kconfig notices**: `warning: Experimental symbol WIFI_NM_WPA_SUPPLICANT is enabled` and similar NCS Wi-Fi experimental warnings appear on every nRF70 build and are expected. Do not flag these as P1 — they are upstream NCS status notices, not project issues. Only flag new or project-specific Kconfig warnings.
 
-### 4.1.3 Documentation Consistency Audit
+### 4.1.4 PRD Satisfaction Check (Code Reading)
+
+Read the code FR-by-FR against the PRD acceptance criteria. No hardware — confirm by inspecting source, Kconfig, and module wiring. This feeds the **`## 4. PRD Satisfaction Check`** report section and the routing verdicts below.
+
+For each Functional Requirement in `docs/pm-prd/PRD.md`, find the code evidence and assign a verdict:
+
+| Verdict | Meaning | Route |
+|---------|---------|-------|
+| ✅ Implemented | Acceptance criterion satisfied in code | — |
+| ⚠️ Partial | Some criteria met, gaps remain | Phase 3 (next iteration) |
+| ❓ Not visible | Cannot confirm without running on hardware | Carry as a priority TC to `chsh-sk-ncs-4.2-validation` |
+| ❌ Mismatch | Code contradicts the criterion | P0 — Phase 3 immediately |
+
+> A ❓ verdict is not a failure — it is the hand-off list to hardware validation. A ❌ is a P0 code bug.
+
+### 4.1.5 Documentation Consistency Audit
 
 Work through the version chain in order. A failure at an earlier step blocks the steps below it.
 
 **Step A — PRD version → Specs**
 
 ```bash
-# 1. Read the latest PRD Changelog entry to get PRD_VERSION
-grep -E "^\| [0-9]{4}" docs/pm-prd/PRD.md | tail -1
+# 1. Read the newest PRD Changelog entry to get PRD_VERSION
+awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/pm-prd/PRD.md | sort | tail -1
 
-# 2. Confirm overview.md PRD Version field matches PRD_VERSION
-grep "PRD Version" docs/dev-specs/overview.md
+# 2. Confirm 0-overview.md PRD Version field matches PRD_VERSION
+grep "PRD Version" docs/dev-specs/0-overview.md
 ```
 
 | Check | Pass condition |
 |-------|----------------|
-| Specs reference current PRD version | `docs/dev-specs/overview.md` header/changelog explicitly references `PRD_VERSION`; no older PRD version cited |
+| Specs reference current PRD version | `docs/dev-specs/0-overview.md` header/changelog explicitly references `PRD_VERSION`; no older PRD version cited |
 | PRD FR/NFR coverage | Every Functional Requirement and Non-Functional Requirement in PRD traceable to at least one spec requirement |
 
 **Step B — Specs version → Code** *(only if Step A passes)*
 
 ```bash
-# 1. Read the latest Specs Changelog entry to get SPECS_VERSION
-grep -E "^\| [0-9]{4}" docs/dev-specs/overview.md | tail -1
+# 1. Read the newest Specs Changelog entry to get SPECS_VERSION
+awk -F'|' '/## Changelog/{f=1} f && $2 ~ /^ *[0-9]{4}-[0-9]{2}-[0-9]{2}/{gsub(/ /,"",$2); print $2}' docs/dev-specs/0-overview.md | sort | tail -1
 
 # 2. Confirm prj.conf carries the matching tags
 grep -E "ZEGO_APP_(PRD|SPECS)_VERSION" prj.conf
@@ -143,9 +172,9 @@ grep -E "ZEGO_APP_(PRD|SPECS)_VERSION" prj.conf
 
 | Check | Pass condition |
 |-------|----------------|
-| `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` | Matches the latest `docs/dev-specs/overview.md` Changelog entry |
+| `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` | Matches the latest `docs/dev-specs/0-overview.md` Changelog entry |
 | `CONFIG_ZEGO_APP_PRD_VERSION` in `prj.conf` | Matches the latest `docs/pm-prd/PRD.md` Changelog entry |
-| Spec modules → code | Every `docs/dev-specs/<module>.md` has a `src/modules/<name>/` counterpart |
+| Spec modules → code | Every `docs/dev-specs/<name>-module.md` has a `src/modules/<name>/` counterpart |
 
 **Step C — PRD features → README** *(only if Steps A & B pass)*
 
@@ -160,7 +189,7 @@ grep -i "feature\|capability\|support" README.md | head -20
 | README feature list | Every PRD feature (FR items) mentioned in README; no stale or removed features listed |
 | No undocumented features in README | README does not describe features absent from the PRD |
 
-### 4.1.4 Generate Verification Report
+### 4.1.6 Generate Verification Report
 
 Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPLATE.md` as the base:
 
@@ -168,9 +197,11 @@ Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPL
 |---------|---------|
 | Document Info | PRD version, Specs version, reviewer, date |
 | Code Review | Findings per check, severity (P0/P1/P2) |
+| Code Format | clang-format check result (4.1.2) — files with violations |
 | Build Result | Pass/Fail, warning count, binary size |
+| PRD Satisfaction | FR-by-FR verdicts from code reading (4.1.4): ✅/⚠️/❓/❌ |
 | Docs Audit | Version chain: PRD→Specs (Step A), Specs→Code (Step B), PRD features→README (Step C); coverage gaps |
-| Routing | P0 → Phase 3 / spec gap → Phase 2 / ✅ proceed to 4.2 |
+| Routing | P0 → Phase 3 / spec gap → Phase 2 / ❓ → 4.2 / ✅ proceed to 4.2 |
 
 ---
 

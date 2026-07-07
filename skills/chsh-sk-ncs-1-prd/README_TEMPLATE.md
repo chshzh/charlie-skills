@@ -7,7 +7,7 @@ This template guides authoring of a customer-facing project README for NCS/Zephy
 Place immediately after the `# <Project Title>` heading. Both badges are optional; include them once a GitHub Actions workflow and a releases page exist:
 
 ```markdown
-[![Build](https://github.com/<org>/<repo>/actions/workflows/build.yml/badge.svg)](https://github.com/<org>/<repo>/actions/workflows/build.yml)
+[![Validation](https://github.com/<org>/<repo>/actions/workflows/validation.yml/badge.svg)](https://github.com/<org>/<repo>/actions/workflows/validation.yml)
 [![Latest Release](https://img.shields.io/github/v/release/<org>/<repo>?label=Release&color=skyblue)](https://github.com/<org>/<repo>/releases/latest)
 ```
 
@@ -161,7 +161,7 @@ Use a fenced `text` code block showing the repo directory tree:
 
 Copy this block verbatim, replacing only `<project-repo-url>` and `<project-dir-name>`:
 
-```markdown
+````markdown
 ### Workspace Setup
 
 West workspace is driven by [west.yml](west.yml), which contains the NCS version this application is based on. For example, the following entry means NCS v3.3.0:
@@ -209,7 +209,7 @@ west update
 ```
 
 See the Nordic guide on [Workspace Application Setup](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/dev_model_and_contributions/adding_code.html#workflow_4_workspace_application_repository_recommended) for details.
-```
+````
 
 ### Build
 
@@ -266,7 +266,7 @@ Project-specific bullets a developer must know before modifying or debugging the
 - **NVS and credential persistence** — what survives a reboot vs. a full erase; when re-provisioning is required.
 - **Session or connection behavior** — intentional design choices affecting reconnect logic, mode switching, credential handling.
 - **Log interpretation** — startup banner contents (firmware version, module list, SYS_INIT priorities) and any periodic log reminders.
-- **Links to module specs** — inline links to `docs/dev-specs/<module>.md` or `zego/<module>` docs for non-obvious behavior.
+- **Links to module specs** — inline links to `docs/dev-specs/<name>-module.md` or `zego/<module>` docs for non-obvious behavior.
 
 
 
@@ -279,16 +279,15 @@ Copy this block verbatim, then update the table rows for the project:
 ```markdown
 ## Documentation
 
-The full design documentation lives under `docs/`. Start with [docs/dev-specs/overview.md](docs/dev-specs/overview.md), which maps every PRD requirement to the spec file that implements it and provides an architecture summary.
+The full design documentation lives under `docs/`. Start with [docs/dev-specs/0-overview.md](docs/dev-specs/0-overview.md), which maps every PRD requirement to the spec file that implements it and provides an architecture summary.
 
 | Document | Description |
 |---|---|
 | [docs/pm-prd/PRD.md](docs/pm-prd/PRD.md) | Product Requirements — user perspective features, behavior, acceptance criteria, changelog |
-| [docs/dev-specs/overview.md](docs/dev-specs/overview.md) | **Start here** — technical spec index, PRD-to-spec mapping, architecture summary, design decisions |
-| [docs/dev-specs/architecture.md](docs/dev-specs/architecture.md) | System architecture — module map, Zbus channels, SYS_INIT boot sequence, memory budget |
-| [docs/dev-specs/<module>.md](docs/dev-specs/<module>.md) | Module behavior and interfaces |
+| [docs/dev-specs/0-overview.md](docs/dev-specs/0-overview.md) | **Start here** — technical spec index, PRD-to-spec mapping, architecture summary, design decisions |
+| [docs/dev-specs/1-architecture.md](docs/dev-specs/1-architecture.md) | System architecture — module map, Zbus channels, SYS_INIT boot sequence, memory budget |
+| [docs/dev-specs/<name>-module.md](docs/dev-specs/<name>-module.md) | Module behavior and interfaces |
 | [zego/<module> ↗](https://github.com/chshzh/zego/blob/main/modules/<module>/docs/<module>-spec.md) | zego module spec — add one row per module used (button, led, wifi, network) |
-| [docs/qa-test/README.md](docs/qa-test/README.md) | QA snapshot folder conventions |
 ```
 
 Notes:

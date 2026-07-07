@@ -58,11 +58,11 @@ The subagent automatically classifies `src/` changes into two severity levels us
 - First option: **"Stop — update PRD + specs first"**
 
 **Phase 2 only** — implementation boundary crossed, no user-visible change (new Zbus channel, new SMF state, new Kconfig, new module):
-- Shows: `docs/dev-specs/overview.md` (current: `<timestamp>`)
+- Shows: `docs/dev-specs/0-overview.md` (current: `<timestamp>`)
 - First option: **"Stop — update specs first"**
 
 If pins are already bumped in the same batch → no warning shown.
-This check does **not** run for Zephyr-style repos, or any repo where `docs/qa-test/` does not exist.
+This check does **not** run for Zephyr-style repos, or any repo where neither `docs/pm-prd/PRD.md` nor `docs/dev-specs/` exists.
 
 ## After push — NCS / firmware repos only
 
@@ -89,9 +89,6 @@ Only skip the subagent if:
 For inline execution, follow the workflow in `~/.claude/agents/chsh-ag-git.md` directly — that file is the canonical reference for inspection, planning, approval gates, formats, and grouping rules.
 
 The skill should stay concise and delegation-focused; commit trailer format details and fallback behavior are source-of-truth in `~/.claude/agents/chsh-ag-git.md`.
-
-## Gotchas
-- TODO: add one entry per real observed failure or routing false-positive
 
 ## Self-Update Policy
 

@@ -59,6 +59,14 @@ After the task completes, read `/tmp/loop_test_results.txt` for the full per-ite
 | 10 | Acceptance gate (minimum) |
 | 20 | Release gate |
 
+### F2b. Standalone script (offline / no-agent alternative)
+
+When running outside an agent session, [`../scripts/loop_test.py`](../scripts/loop_test.py)
+performs the same reset → boot → connect → verify loop over raw pyserial.
+Edit its config block first (`SERIAL_PORT`, `BOARD_SERIAL`, `SSID`, `PSK`, `KEY_MGMT`,
+and the board-dependent `RTSCTS` constant), then `python3 loop_test.py [iterations]`.
+Inside an agent session prefer F1 (`chsh-ag-terminal` is the single source of truth for serial).
+
 ### F3. Multi-device loop test
 
 Invoke `chsh-ag-terminal` twice with `run_in_background=True`, once per board, then

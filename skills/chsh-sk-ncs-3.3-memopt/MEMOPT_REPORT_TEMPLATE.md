@@ -1,5 +1,7 @@
 # Memory Optimization Report — <Project Name>
 
+> Canonical output path: `docs/dev-specs/3-memopt.md` (update the file `chsh-sk-ncs-2-spec` first generated; do not create a separate `MEMOPT_REPORT.md`).
+
 ## Document Information
 
 | Field | Value |
