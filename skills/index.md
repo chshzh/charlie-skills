@@ -1,7 +1,7 @@
 # Skills Index
 
 > Skill catalog. Each entry links to the SKILL.md for that skill.
-> Last updated: 2026-06-30 | Total skills: 24
+> Last updated: 2026-07-17 | Total skills: 26
 
 ## NCS / Firmware Workflow
 
@@ -50,3 +50,11 @@
 ## Text & Docs
 
 - [chsh-sk-txt-review](chsh-sk-txt-review/SKILL.md) — Polishes emails, messages, and customer-facing text
+
+## Customer Success
+
+- [chsh-sk-cs-engineer](chsh-sk-cs-engineer/SKILL.md) — Reviews customer-facing replies, triages reported issues, sounding board for customer care strategy
+
+## Productivity
+
+- [chsh-sk-grill-me](chsh-sk-grill-me/SKILL.md) — Relentlessly interviews the user to stress-test a plan, decision, or idea before they commit to it

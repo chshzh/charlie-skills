@@ -56,6 +56,8 @@ Used as section headers in `index.md`. Assign each skill to exactly one category
 | Memory / AI Tools | AgentMemory, wiki, knowledge management |
 | Skill Meta | Skill creation, review, registry maintenance |
 | Text & Docs | Text editing, doc review |
+| Customer Success | Support reply review, issue triage, customer care strategy |
+| Productivity | General-purpose thinking/decision tools, not NCS-specific |
 
 ## Link Conventions
 
