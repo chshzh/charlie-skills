@@ -1,9 +1,9 @@
 ---
-name: chsh-sk-ncs-3.2-debug
+name: chsh-sk-ncs-3-dev-debug
 description: Use when debugging a boot failure, WiFi issue, driver crash, kernel hang, or any firmware reliability problem on nRF devices. Covers UART log capture, board reset, multi-device comparison, loop testing, co-processor debugging, and crash analysis. For environment setup, use chsh-sk-ncs-env first.
 ---
 
-# chsh-sk-ncs-3.2-debug — NCS Embedded Debugging Workflow
+# chsh-sk-ncs-3-dev-debug — NCS Embedded Debugging Workflow
 
 Systematic debugging for NCS/Zephyr applications on Nordic hardware.
 Covers the full range from simple UART log capture to co-processor barrier synchronization.
@@ -58,7 +58,7 @@ Issue reported
       ├── Crash / USAGE FAULT in log ─────────→ Mode C (addr2line, GDB)
       ├── Co-processor / sQSPI hang ──────────→ Mode D (barrier debug)
       ├── Intermittent failure ───────────────→ Mode F (loop test)
-      ├── Stack overflow / OOM ──────────────→ chsh-sk-ncs-3.3-memopt
+      ├── Stack overflow / OOM ──────────────→ chsh-sk-ncs-3-dev-memopt
       │
       └── UART logs insufficient?
             ├── Protocol timing (SPI/I2C)  → Saleae MCP
@@ -228,7 +228,7 @@ check to confirm the port is now FREE before proceeding.
 | WiFi fails, drivers misbehave | B — UART logs + WiFi debug | `chsh-ag-terminal` |
 | Crash / hardfault in log | C — Crash analysis | `addr2line`, GDB |
 | Co-processor / VPR hang | D — Barrier debugging | UART + instrumentation |
-| Stack overflow / memory corruption | → **chsh-sk-ncs-3.3-memopt** | Thread Analyzer |
+| Stack overflow / memory corruption | → **chsh-sk-ncs-3-dev-memopt** | Thread Analyzer |
 | Intermittent failure | F — Loop test | `chsh-ag-terminal` |
 | CI build fails / pre-built broken | → [`references/github-actions-debug.md`](references/github-actions-debug.md) | `gh` CLI |
 | Protocol-level insight (SPI, I2C) | → [`references/mcp-debug-tools.md`](references/mcp-debug-tools.md) | Saleae MCP |
@@ -458,13 +458,13 @@ REST API + MCP — see [`references/eedp-platform.md`](references/eedp-platform.
 |------|-------|
 | Serial terminal — capture logs, send commands, loop test | `chsh-ag-terminal` subagent |
 | First-time NCS setup | `chsh-sk-ncs-env` |
-| Optimize RAM/Flash | `chsh-sk-ncs-3.3-memopt` |
-| Review expected module behavior from spec | `chsh-sk-ncs-2-spec` |
-| Phase 4.1 static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4.1-verification` |
-| Phase 4.2 hardware/EEDP runtime re-verification | `chsh-sk-ncs-4.2-validation` |
+| Optimize RAM/Flash | `chsh-sk-ncs-3-dev-memopt` |
+| Review expected module behavior from spec | `chsh-sk-ncs-2-dev-spec` |
+| Static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4-test-verification` |
+| Hardware/EEDP runtime re-verification | `chsh-sk-ncs-4-test-validation` |
 | EEDP platform setup + all modules | [`references/eedp-platform.md`](references/eedp-platform.md) · wiki: `eedp-platform` |
-| Commit after fixing | `chsh-sk-ncs-3.4-git-commit` |
-| Tag and publish a release after CI passes | `chsh-sk-ncs-3.5-release` |
+| Commit after fixing | `chsh-sk-ncs-git-commit` |
+| Tag and publish a release after CI passes | `chsh-sk-ncs-git-release` |
 | Migrate to a newer NCS version | `chsh-sk-ncs-migrate` |
 | Physical button/LED test automation | `references/eedp-gpio-shell-approach.md` — zero-firmware GPIO shell approach |
 | mcp.nordic-mcp tools reference | wiki: `mcp-nrflow-tools` |

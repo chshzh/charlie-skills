@@ -1,5 +1,5 @@
 ---
-name: chsh-sk-ncs-3.1-coding
+name: chsh-sk-ncs-3-dev-coding
 description: >-
   Load when implementing NCS project code from engineering specs. Reads specs
   in docs/dev-specs/ and uses nordic-wifi-webdash and nordic-wifi-memfault as
@@ -7,13 +7,13 @@ description: >-
   written or updated.
 ---
 
-# chsh-sk-ncs-3.1-coding — NCS Code Implementation
+# chsh-sk-ncs-3-dev-coding — NCS Code Implementation
 
 Implements NCS firmware from the engineering specs in `docs/dev-specs/`.
 Uses two real project repositories as reference implementations.
 
 > **Prerequisite**: `docs/dev-specs/1-architecture.md` and at least one module
-> spec must exist. If specs are missing, run **chsh-sk-ncs-2-spec** first.
+> spec must exist. If specs are missing, run **chsh-sk-ncs-2-dev-spec** first.
 
 > **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` to load `embedded-code-guidance-ncs-zephyr` — covers NCS code style, Kconfig patterns, and driver idioms. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` for API lookups, board targets, and driver symbol names.
 
@@ -109,7 +109,7 @@ For each module from the spec:
    Fix all warnings. Confirm UART output matches spec test points.
 
 5. Set up CI (new projects only):
-   - Read the template at `.claude/skills/chsh-sk-ncs-3.1-coding/build_template.yml`
+   - Read the template at `.claude/skills/chsh-sk-ncs-3-dev-coding/build_template.yml`
    - Replace all `<PLACEHOLDER>` tokens with the project-specific values:
      - `<APP_NAME>` → repo/directory name
      - `<APP_DISPLAY_NAME>` → human-readable title
@@ -121,9 +121,9 @@ For each module from the spec:
    - If `APP_VERSION_STRING` is not used in the app's `CMakeLists.txt`, remove the version-injection block from the Build step.
 
 6. Handoff:
-   > "Implementation complete. Run **chsh-sk-ncs-4.1-verification** for Phase 4.1
+   > "Implementation complete. Run **chsh-sk-ncs-4-test-verification** for
    > Verification (code review, clean build, doc audit — no hardware); then run
-   > **chsh-sk-ncs-4.2-validation** for hardware validation."
+   > **chsh-sk-ncs-4-test-validation** for hardware validation."
 
 ---
 
@@ -231,10 +231,10 @@ Every module **must** have structured logging at all four levels. This enables p
 
 | Task | Skill |
 |------|-------|
-| Generate engineering specs | `chsh-sk-ncs-2-spec` |
-| Phase 4 Verification & Test | `chsh-sk-ncs-4.1-verification` |
-| Debug build failures, UART analysis | `chsh-sk-ncs-3.2-debug` |
-| Commit after implementation | `chsh-sk-ncs-3.4-git-commit` |
+| Generate engineering specs | `chsh-sk-ncs-2-dev-spec` |
+| Phase 4 Verification & Test | `chsh-sk-ncs-4-test-verification` |
+| Debug build failures, UART analysis | `chsh-sk-ncs-3-dev-debug` |
+| Commit after implementation | `chsh-sk-ncs-git-commit` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Self-Update Policy

@@ -219,12 +219,12 @@ After fixing dead links, re-run the comprehensive scan and confirm zero broken l
 When skill A mentions a topic that skill B owns, A should reference B.
 
 Patterns to detect:
-- A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-3.2-debug`
-- A skill mentions "git commit" or "push" without referencing `chsh-sk-ncs-3.4-git-commit`
-- A skill mentions "release" or "tag" without referencing `chsh-sk-ncs-3.5-release`
-- A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-1-prd`
-- A skill mentions "specs" without referencing `chsh-sk-ncs-2-spec`
-- A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-4.1-verification`
+- A skill mentions "debug" or "UART" without referencing `chsh-sk-ncs-3-dev-debug`
+- A skill mentions "git commit" or "push" without referencing `chsh-sk-ncs-git-commit`
+- A skill mentions "release" or "tag" without referencing `chsh-sk-ncs-git-release`
+- A skill mentions "PRD" or "requirements" without referencing `chsh-sk-ncs-1-pm-prd`
+- A skill mentions "specs" without referencing `chsh-sk-ncs-2-dev-spec`
+- A skill talks about "QA" or "test report" without referencing `chsh-sk-ncs-4-test-verification`
 
 For each gap, suggest a one-line addition to the Related Skills table.
 
@@ -364,7 +364,7 @@ For each approved fix:
 4. After all fixes are applied (but **before committing**), append a row to `~/.claude/skills/log.md`:
    `| YYYY-MM-DD | (review) | N issues fixed: <brief summary> | \`<short-commit>\` |`
    Use `<short-commit>` as a literal placeholder for now.
-5. Commit all changed skill files **and `log.md` together** via `chsh-sk-ncs-3.4-git-commit`.
+5. Commit all changed skill files **and `log.md` together** via `chsh-sk-ncs-git-commit`.
 6. After the commit, get the new HEAD and update the placeholder in-place — **do not commit this update**:
    ```bash
    HASH=$(git -C ~/.claude/skills rev-parse --short HEAD)
@@ -451,8 +451,8 @@ Check if skills with `Self-Update Policy` sections were last updated recently (v
 | Task | Skill |
 |------|-------|
 | Author a new skill | `chsh-sk-skill-create` |
-| Commit reviewed skill fixes | `chsh-sk-ncs-3.4-git-commit` |
-| Push to claude repo | `chsh-sk-ncs-3.4-git-commit` (Step 5 — push) |
+| Commit reviewed skill fixes | `chsh-sk-ncs-git-commit` |
+| Push to claude repo | `chsh-sk-ncs-git-commit` (Step 5 — push) |
 
 ---
 

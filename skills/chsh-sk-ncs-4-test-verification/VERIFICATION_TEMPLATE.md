@@ -70,7 +70,7 @@ Violations:
 |----|---------------------|---------------|---------|
 | FR-001 | | | ✅ / ⚠️ / ❓ / ❌ |
 
-`❓ Not visible` = cannot confirm without hardware — add as priority TC in **chsh-sk-ncs-4.2-validation**
+`❓ Not visible` = cannot confirm without hardware — add as priority TC in **chsh-sk-ncs-4-test-validation**
 `❌ Mismatch` = P0, route to Phase 3
 
 **PRD result**: ___ implemented, ___ partial, ___ not visible, ___ mismatch

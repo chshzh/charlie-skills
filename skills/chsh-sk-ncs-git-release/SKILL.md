@@ -1,14 +1,14 @@
 ---
-name: chsh-sk-ncs-3.5-release
-description: Use when tagging a release, watching CI, or publishing firmware to GitHub for NCS projects. Covers git tag → CI → GitHub Release artifact. After publishing, triggers chsh-sk-ncs-4.2-validation to validate the released build on hardware via a local west build.
+name: chsh-sk-ncs-git-release
+description: Use when tagging a release, watching CI, or publishing firmware to GitHub for NCS projects. Covers git tag → CI → GitHub Release artifact. After publishing, offers to run chsh-sk-ncs-4-test-validation to validate the released build on hardware via a local west build.
 ---
 
-# chsh-sk-ncs-3.5-release — Release Tagging & Publishing
+# chsh-sk-ncs-git-release — Release Tagging & Publishing
 
 Covers the full release cycle for NCS firmware projects: git tag → GitHub Actions CI → release artifact → flash → verify.
 
 > **Prerequisites**: A passing build and a GitHub repo with a CI workflow that publishes `.hex` artifacts.
-> If CI is broken, fix it first with **chsh-sk-ncs-3.2-debug** Mode G before tagging.
+> If CI is broken, fix it first with **chsh-sk-ncs-3-dev-debug** Mode G before tagging.
 
 ---
 
@@ -110,14 +110,14 @@ gh release delete-asset v<MAJOR>.<MINOR>.<PATCH> merged.hex \
 
 ---
 
-## Step 4 — Handoff to Validation
+## Step 4 — Offer Validation
 
-Release published. Hand off to Phase 4.2 to validate the released build on hardware via a local west build.
+Release published. Ask whether to validate the released build on hardware — do not run it automatically.
 
 ```AskQuestion:
-  prompt: "Release published. Run Phase 4.2 Validation on hardware?"
+  prompt: "Release published. Run Phase 4 Validation on hardware?"
   options:
-    - "Yes — load chsh-sk-ncs-4.2-validation (validates the released build via a local west build)"
+    - "Yes — load chsh-sk-ncs-4-test-validation (validates the released build via a local west build)"
     - "No — release is done"
 ```
 
@@ -141,9 +141,9 @@ Release published. Hand off to Phase 4.2 to validate the released build on hardw
 When CI is failing, iterate:
 
 ```
-edit → commit (chsh-sk-ncs-3.4-git-commit) → push → gh run watch
+edit → commit (chsh-sk-ncs-git-commit) → push → gh run watch
   → (fail) → gh run view --log-failed → fix → repeat
-  → (pass) → AskQuestion (Step 4) → load chsh-sk-ncs-4.2-validation → done
+  → (pass) → AskQuestion (Step 4) → load chsh-sk-ncs-4-test-validation → done
 ```
 
 ---
@@ -152,9 +152,9 @@ edit → commit (chsh-sk-ncs-3.4-git-commit) → push → gh run watch
 
 | Task | Skill |
 |------|-------|
-| Commit before pushing | `chsh-sk-ncs-3.4-git-commit` |
-| Validate the released build on hardware (local west build) | `chsh-sk-ncs-4.2-validation` |
-| Debug CI failures, UART capture | `chsh-sk-ncs-3.2-debug` (Mode G) |
+| Commit before pushing | `chsh-sk-ncs-git-commit` |
+| Validate the released build on hardware (local west build) | `chsh-sk-ncs-4-test-validation` |
+| Debug CI failures, UART capture | `chsh-sk-ncs-3-dev-debug` (Mode G) |
 | Build commands, toolchain | `chsh-sk-ncs-env` |
 
 ---

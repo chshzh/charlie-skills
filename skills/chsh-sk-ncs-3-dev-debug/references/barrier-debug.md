@@ -1,7 +1,7 @@
 # Co-processor / VPR Barrier Debugging
 
 Barrier hang diagnosis for sQSPI / MSPI soft peripheral on nRF54L series.
-Referenced from [chsh-sk-ncs-3.2-debug Mode D](../SKILL.md#mode-d--co-processor--vpr-barrier-debugging).
+Referenced from [chsh-sk-ncs-3-dev-debug Mode D](../SKILL.md#mode-d--co-processor--vpr-barrier-debugging).
 
 ## D1. Identify the pattern
 

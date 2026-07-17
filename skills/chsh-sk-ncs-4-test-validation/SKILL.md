@@ -1,19 +1,19 @@
 ---
-name: chsh-sk-ncs-4.2-validation
+name: chsh-sk-ncs-4-test-validation
 description: >-
-  Load when running hardware validation for an NCS project — after 4.1 static verification,
+  Load when running hardware validation for an NCS project — after static verification,
   after a feature, or before a release (not release-only). Derives test scenarios from PRD
   acceptance criteria into a reviewable VALIDATION_PLAN.md, executes them on hardware
   shell-first via chsh-ag-terminal, captures peak thread/heap watermarks with ZView over SWD,
-  and produces VALIDATION_REPORT.md (which feeds chsh-sk-ncs-3.3-memopt). Hardware required.
+  and produces VALIDATION_REPORT.md (which feeds chsh-sk-ncs-3-dev-memopt). Hardware required.
 ---
 
-# chsh-sk-ncs-4.2-validation — Hardware Validation (Plan → Execute → Report)
+# chsh-sk-ncs-4-test-validation — Hardware Validation (Plan → Execute → Report)
 
 Confirms PRD acceptance criteria are satisfied **at runtime**, and captures accurate peak
 memory watermarks under load. **Hardware required.**
 
-**Run anytime** — most commonly right after Phase 4.1 static verification, but equally after
+**Run anytime** — most commonly right after static verification, but equally after
 finishing a feature or before a release. This is not a release-only step.
 
 Two living documents (fixed names, internal Changelog — like `PRD.md`/`architecture.md`):
@@ -21,8 +21,8 @@ Two living documents (fixed names, internal Changelog — like `PRD.md`/`archite
 - `docs/qa-test/VALIDATION_REPORT.md` — the results (from `VALIDATION_REPORT_TEMPLATE.md`)
 
 > Static code review (security, format, quality, code-reading PRD check) belongs to
-> **chsh-sk-ncs-4.1-verification** — not repeated here.
-> EEDP platform / UART connection details — see **chsh-sk-ncs-3.2-debug**
+> **chsh-sk-ncs-4-test-verification** — not repeated here.
+> EEDP platform / UART connection details — see **chsh-sk-ncs-3-dev-debug**
 > (board→VCOM table, port pre-checks, `chsh-ag-terminal` delegation).
 
 ---
@@ -38,7 +38,7 @@ Two living documents (fixed names, internal Changelog — like `PRD.md`/`archite
    Don't assume a fixed board set — the user plugs in different DKs per run.
 
 2. **Build the per-board addressing map** (single source of truth for every phase). For each
-   connected board the project has a config/build for, resolve from the **chsh-sk-ncs-3.2-debug**
+   connected board the project has a config/build for, resolve from the **chsh-sk-ncs-3-dev-debug**
    board table:
 
    | Board | `--dev-id` (SN) | VCOM port + rtscts | Baud | J-Link target | ELF (sysbuild: under app sub-image) | Shell |
@@ -59,7 +59,7 @@ Two living documents (fixed names, internal Changelog — like `PRD.md`/`archite
    - **Plan complexity** (this shapes everything in V1):
      - *Simple / automated* — shell commands only, fully scripted, fast (minutes)
      - *Comprehensive / realistic* — real app usage scenarios, AP mode transitions, manual
-       provisioning flows, interactive debugging with tools from `chsh-sk-ncs-3.2-debug`
+       provisioning flows, interactive debugging with tools from `chsh-sk-ncs-3-dev-debug`
        (RTT, coredump, logic analyser, etc.), steps that require the **human to operate
        the device or react to UI events**
 
@@ -77,7 +77,7 @@ Gate determines how many collaborative checkpoints you make:
 
 - *Simple*: draft a Coverage Matrix + single round, show to user, get approval → done.
 - *Comprehensive*: co-design each round — surface proposed scenarios, ask which debugging tools
-  (from `chsh-sk-ncs-3.2-debug`) to include, identify where human interaction is required, ask
+  (from `chsh-sk-ncs-3-dev-debug`) to include, identify where human interaction is required, ask
   whether to add AP-simulation rounds (`chsh-sk-router-control`) or throughput rounds, then get
   final approval.
 
@@ -92,7 +92,7 @@ Generate from `VALIDATION_PLAN_TEMPLATE.md`.
    - Which rows require **human interaction** (e.g. provisioning a phone to the AP, navigating
      a captive portal, triggering a manual OTA check, observing LED behaviour)? — mark these
      `[HUMAN]` in the round definition so the plan makes clear when to pause for a human step.
-   - For complex plans: which rows benefit from `chsh-sk-ncs-3.2-debug` tools (RTT log,
+   - For complex plans: which rows benefit from `chsh-sk-ncs-3-dev-debug` tools (RTT log,
      coredump decode, logic analyser capture)?
 
 3. Group into **test rounds — aim for 1–3, max 5**. Combine as many checks as possible into one
@@ -124,7 +124,7 @@ nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
 ### Drive the test (shell-first)
 
 Delegate serial to **`chsh-ag-terminal`** — never drive pyserial directly. Follow
-**chsh-sk-ncs-3.2-debug** Steps 0.5–0.7 first (confirm target, set up the `tail -f` session log,
+**chsh-sk-ncs-3-dev-debug** Steps 0.5–0.7 first (confirm target, set up the `tail -f` session log,
 verify the port is FREE). Pass board + port + rtscts + log file to the subagent.
 
 ```
@@ -139,7 +139,7 @@ parsing instead (e.g. Button 1 = heartbeat, Button 2 = OTA check; crash demos vi
 
 **Stability gate**: for any criterion saying "reliably/consistently/always" or a success-rate
 threshold, run a loop test — `chsh-ag-terminal: run loop test N iterations on <board>` (10 =
-acceptance, 20 = release), fallback Mode F in chsh-sk-ncs-3.2-debug. Record pass rate.
+acceptance, 20 = release), fallback Mode F in chsh-sk-ncs-3-dev-debug. Record pass rate.
 
 ### ZView memory-watermark capture (for [ZView] rounds)
 
@@ -179,7 +179,7 @@ nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- \
 ```
 Or a single live frame: `nrfutil sdk-manager toolchain launch --ncs-version=${NCS_VERSION:-v3.3.0} -- west zview dump -e <elf> -r jlink -t <target> -s <SN> --json`.
 J-Link targets: nRF7002DK → `nRF5340_xxAA`; nRF54LM20DK → `nRF54LM20A_M33`.
-For interactive watching, see `chsh-sk-ncs-3.3-memopt` → **Live ZView**.
+For interactive watching, see `chsh-sk-ncs-3-dev-memopt` → **Live ZView**.
 Record the per-board peak thread stacks (name, Kconfig symbol, peak/alloc, %) and heap peaks
 (system + mbedTLS) into the report's **Memory Watermarks** section, noting the producing round.
 
@@ -192,7 +192,7 @@ Generate from `VALIDATION_REPORT_TEMPLATE.md`:
 - Executive Summary (totals + verdict) at the top
 - Per-FR results (TC | criterion | board | result | evidence) + NFR measured values
 - Failed-test detail (expected vs actual + UART log + routing)
-- **Memory Watermarks** section — the hand-off contract for chsh-sk-ncs-3.3-memopt (per-board
+- **Memory Watermarks** section — the hand-off contract for chsh-sk-ncs-3-dev-memopt (per-board
   peak thread stacks + heap peaks; columns mirror MEMOPT_REPORT). Skip-mark if no ZView pass.
 - UART boot log + performance metrics + routing table
 
@@ -206,18 +206,18 @@ are filled (no empty `___`) when the ZView pass ran.
 
 | Finding | Priority | Route |
 |---------|----------|-------|
-| P0 TC fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3.1-coding`) |
-| P0 TC fails (spec gap) | P0 | Phase 2 (`chsh-sk-ncs-2-spec`) |
+| P0 TC fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3-dev-coding`) |
+| P0 TC fails (spec gap) | P0 | Phase 2 (`chsh-sk-ncs-2-dev-spec`) |
 | Build/flash fails on a board | P0 | Phase 3 |
-| PRD criterion ambiguous | P1 | Phase 1 (`chsh-sk-ncs-1-prd`) |
-| Thread/heap at CRITICAL risk in Memory Watermarks | P1 | Phase 3.3 (`chsh-sk-ncs-3.3-memopt`) — feed this report |
+| PRD criterion ambiguous | P1 | Phase 1 (`chsh-sk-ncs-1-pm-prd`) |
+| Thread/heap at CRITICAL risk in Memory Watermarks | P1 | Phase 3.3 (`chsh-sk-ncs-3-dev-memopt`) — feed this report |
 | P1/P2 failures only | P2 | Phase 3 (next iteration) |
-| All P0 TCs pass | ✅ | Ready for release (`chsh-sk-ncs-3.5-release`) |
+| All P0 TCs pass | ✅ | Ready for release (`chsh-sk-ncs-git-release`) |
 
 After reporting, ask:
 > "Validation complete. Route P0 issues to the appropriate phase, re-size memory with
-> **chsh-sk-ncs-3.3-memopt** (it reads VALIDATION_REPORT.md), or proceed to release with
-> **chsh-sk-ncs-3.5-release**?"
+> **chsh-sk-ncs-3-dev-memopt** (it reads VALIDATION_REPORT.md), or proceed to release with
+> **chsh-sk-ncs-git-release**?"
 
 ---
 
@@ -226,20 +226,20 @@ After reporting, ask:
 - Two living docs, fixed names: `docs/qa-test/VALIDATION_PLAN.md` and `docs/qa-test/VALIDATION_REPORT.md`.
   Each carries its own `Version` (bump on every edit) and a Changelog — not dated snapshots.
 - Include PRD Version + Specs Version in Document Information for traceability.
-- The Memory Watermarks columns must stay 1:1 with `chsh-sk-ncs-3.3-memopt/MEMOPT_REPORT_TEMPLATE.md`.
+- The Memory Watermarks columns must stay 1:1 with `chsh-sk-ncs-3-dev-memopt/MEMOPT_REPORT_TEMPLATE.md`.
 
 ## Related Skills
 
 | Task | Skill |
 |------|-------|
-| UART connection, board→VCOM table, port pre-checks, loop test | `chsh-sk-ncs-3.2-debug` |
+| UART connection, board→VCOM table, port pre-checks, loop test | `chsh-sk-ncs-3-dev-debug` |
 | Serial command/log execution (delegated) | `chsh-ag-terminal` |
-| Re-size heaps/threads from Memory Watermarks | `chsh-sk-ncs-3.3-memopt` |
+| Re-size heaps/threads from Memory Watermarks | `chsh-sk-ncs-3-dev-memopt` |
 | AP simulation, SSID control, reconnect tests | `chsh-sk-router-control` |
 | Wi-Fi throughput benchmarking | `chsh-sk-ncs-tc-wifi-throughput` |
-| Phase 4.1 static verification (no hardware) | `chsh-sk-ncs-4.1-verification` |
-| Fix code for P0 failures | `chsh-sk-ncs-3.1-coding` |
-| Tag and publish release | `chsh-sk-ncs-3.5-release` |
+| Static verification (no hardware) | `chsh-sk-ncs-4-test-verification` |
+| Fix code for P0 failures | `chsh-sk-ncs-3-dev-coding` |
+| Tag and publish release | `chsh-sk-ncs-git-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Gotchas

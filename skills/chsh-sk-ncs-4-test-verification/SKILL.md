@@ -1,18 +1,18 @@
 ---
-name: chsh-sk-ncs-4.1-verification
+name: chsh-sk-ncs-4-test-verification
 description: >-
-  Load when running Phase 4.1 Verification for an NCS project — code review,
+  Load when running Verification for an NCS project — code review,
   clean build, and documentation consistency audit. No hardware required.
 ---
 
-# chsh-sk-ncs-4.1-verification — Phase 4.1: Verification (no hardware)
+# chsh-sk-ncs-4-test-verification — Verification (no hardware)
 
-Phase 4.1 of the NCS project lifecycle. Runs after implementation is complete,
+Verification phase of the NCS project lifecycle. Runs after implementation is complete,
 before any release or demo, and after any merge to main. No hardware required —
 can run in CI.
 
 ```
-4.1 Verification
+Verification
 ├── Code review (structure, config, standards)
 ├── Code format check (clang-format --dry-run)
 ├── Build verification (README "### Build" commands only)
@@ -59,7 +59,7 @@ PRD_VERSION  →  specs/0-overview.md written against PRD_VERSION
 
 ---
 
-## 4.1 — Verification
+## Verification
 
 No hardware required. Can be run independently at any point.
 
@@ -136,7 +136,7 @@ For each Functional Requirement in `docs/pm-prd/PRD.md`, find the code evidence 
 |---------|---------|-------|
 | ✅ Implemented | Acceptance criterion satisfied in code | — |
 | ⚠️ Partial | Some criteria met, gaps remain | Phase 3 (next iteration) |
-| ❓ Not visible | Cannot confirm without running on hardware | Carry as a priority TC to `chsh-sk-ncs-4.2-validation` |
+| ❓ Not visible | Cannot confirm without running on hardware | Carry as a priority TC to `chsh-sk-ncs-4-test-validation` |
 | ❌ Mismatch | Code contradicts the criterion | P0 — Phase 3 immediately |
 
 > A ❓ verdict is not a failure — it is the hand-off list to hardware validation. A ❌ is a P0 code bug.
@@ -201,7 +201,7 @@ Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPL
 | Build Result | Pass/Fail, warning count, binary size |
 | PRD Satisfaction | FR-by-FR verdicts from code reading (4.1.4): ✅/⚠️/❓/❌ |
 | Docs Audit | Version chain: PRD→Specs (Step A), Specs→Code (Step B), PRD features→README (Step C); coverage gaps |
-| Routing | P0 → Phase 3 / spec gap → Phase 2 / ❓ → 4.2 / ✅ proceed to 4.2 |
+| Routing | P0 → Phase 3 / spec gap → Phase 2 / ❓ → Validation / ✅ proceed to Validation |
 
 ---
 
@@ -210,16 +210,16 @@ Create `docs/qa-test/VERIFICATION-YYYY-MM-DD-HH-MM.md` using `VERIFICATION_TEMPL
 | Finding | Priority | Route |
 |---------|----------|-------|
 | Security finding (P0) | P0 | Phase 3 — fix code immediately |
-| P0 test case fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3.1-coding`) |
+| P0 test case fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3-dev-coding`) |
 | Build failure or warning | P0/P1 | Phase 3 |
 | PRD criterion mismatch (❌) | P0 | Phase 3 |
-| Spec gap / undocumented behaviour | P1 | Phase 2 (`chsh-sk-ncs-2-spec`) |
-| New requirement found | P1 | Phase 1 (`chsh-sk-ncs-1-prd`) → Phase 2 → Phase 3 |
+| Spec gap / undocumented behaviour | P1 | Phase 2 (`chsh-sk-ncs-2-dev-spec`) |
+| New requirement found | P1 | Phase 1 (`chsh-sk-ncs-1-pm-prd`) → Phase 2 → Phase 3 |
 | P1/P2 issues only | P2 | Phase 3 (next iteration) |
-| All P0 checks pass | ✅ | Proceed to hardware validation (`chsh-sk-ncs-4.2-validation`) |
+| All P0 checks pass | ✅ | Proceed to hardware validation (`chsh-sk-ncs-4-test-validation`) |
 
 After reporting, ask:
-> "Verification complete. Proceed to hardware validation with **chsh-sk-ncs-4.2-validation**, or route issues to the appropriate phase?"
+> "Verification complete. Proceed to hardware validation with **chsh-sk-ncs-4-test-validation**, or route issues to the appropriate phase?"
 
 ---
 
@@ -241,11 +241,11 @@ After reporting, ask:
 
 | Task | Skill |
 |------|-------|
-| Implement code (Phase 3) | `chsh-sk-ncs-3.1-coding` |
-| Debug firmware failures | `chsh-sk-ncs-3.2-debug` |
+| Implement code (Phase 3) | `chsh-sk-ncs-3-dev-coding` |
+| Debug firmware failures | `chsh-sk-ncs-3-dev-debug` |
 | Auto-fix clang-format violations | `chsh-sk-ncs-clang-format` |
-| Hardware validation (Phase 4.2) | `chsh-sk-ncs-4.2-validation` |
-| Tag and publish release | `chsh-sk-ncs-3.5-release` |
+| Hardware validation | `chsh-sk-ncs-4-test-validation` |
+| Tag and publish release | `chsh-sk-ncs-git-release` |
 | Full lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Self-Update Policy

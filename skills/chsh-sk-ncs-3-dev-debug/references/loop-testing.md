@@ -1,7 +1,7 @@
 # Loop Testing for Stability
 
 Scripted loop test to confirm fix stability. 10 passes = acceptance gate, 20 = release gate.
-Referenced from [chsh-sk-ncs-3.2-debug Mode F](../SKILL.md#mode-f--loop-testing-for-stability).
+Referenced from [chsh-sk-ncs-3-dev-debug Mode F](../SKILL.md#mode-f--loop-testing-for-stability).
 
 
 Use a scripted loop test whenever a failure is intermittent or after any fix to confirm

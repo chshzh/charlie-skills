@@ -29,6 +29,6 @@ Perform flash, reset, and router operations manually.
 
 ## Related
 
-- `chsh-sk-ncs-3.2-debug` Mode H — Saleae MCP and JLink MCP detailed setup
+- `chsh-sk-ncs-3-dev-debug` Mode H — Saleae MCP and JLink MCP detailed setup
 - [`eedp-gpio-shell-approach.md`](eedp-gpio-shell-approach.md) — GPIO Shell for button/LED test automation
 - wiki: `eedp-platform` — architecture, BOM, MCP integration patterns

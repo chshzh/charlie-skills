@@ -188,9 +188,9 @@ Add a `⚠ Doc-sync` row to the commit plan table before the numbered commits:
 
 If the user picks any **"Stop"** option, do not commit anything. Report:
 
-- Phase 1 + 2: "Stopping. Use **chsh-sk-ncs-1-prd** (**Mode D** — code moved ahead of PRD) to update `docs/pm-prd/PRD.md` (current: `<PRD_CURRENT>`), then **chsh-sk-ncs-2-spec** (**Mode B** — update specs to match new PRD; or **Mode C** if `docs/dev-specs/` does not exist yet) to update `docs/dev-specs/` (current: `<SPEC_CURRENT>`), then come back to commit."
-- Phase 2 only (specs exist): "Stopping. Use **chsh-sk-ncs-2-spec** (**Mode B** — update specs) to update `docs/dev-specs/overview.md` (current: `<SPEC_CURRENT>`) and the affected module specs, then come back to commit."
-- Phase 2 only (no `docs/dev-specs/` yet): "Stopping. Use **chsh-sk-ncs-2-spec** (**Mode C** — reverse design, generate specs from existing code), then come back to commit."
+- Phase 1 + 2: "Stopping. Use **chsh-sk-ncs-1-pm-prd** (**Mode D** — code moved ahead of PRD) to update `docs/pm-prd/PRD.md` (current: `<PRD_CURRENT>`), then **chsh-sk-ncs-2-dev-spec** (**Mode B** — update specs to match new PRD; or **Mode C** if `docs/dev-specs/` does not exist yet) to update `docs/dev-specs/` (current: `<SPEC_CURRENT>`), then come back to commit."
+- Phase 2 only (specs exist): "Stopping. Use **chsh-sk-ncs-2-dev-spec** (**Mode B** — update specs) to update `docs/dev-specs/overview.md` (current: `<SPEC_CURRENT>`) and the affected module specs, then come back to commit."
+- Phase 2 only (no `docs/dev-specs/` yet): "Stopping. Use **chsh-sk-ncs-2-dev-spec** (**Mode C** — reverse design, generate specs from existing code), then come back to commit."
 
 ### Step 3 — Use any provided rationale (no questions)
 
@@ -310,7 +310,7 @@ git push -u origin <branch>           # if upstream is not set
 
 Do **not** open a PR. Do **not** run CI checks. Do **not** watch GitHub Actions. Those are separate workflows (use `chsh-dev-git-release` or the parent agent).
 
-### Step 8 — Offer Phase 4.1 Verification (user app repos with docs only)
+### Step 8 — Offer Verification (user app repos with docs only)
 
 Skip this step if:
 - Repo is Zephyr-style (NCS workspace path)
@@ -320,14 +320,14 @@ Otherwise, after the push gate completes (or after Step 6 if the user declined t
 
 ```
 AskQuestion:
-  prompt: "Run Phase 4.1 Verification now? (chsh-sk-ncs-4.1-verification — code review, build, docs audit, no hardware)"
+  prompt: "Run Verification now? (chsh-sk-ncs-4-test-verification — code review, build, docs audit, no hardware)"
   options:
-    - "Yes — run Phase 4.1 Verification now"
+    - "Yes — run Verification now"
     - "No — I'll run it later"
 ```
 
 If the user picks **"Yes"**, report:
-> "Load skill **chsh-sk-ncs-4.1-verification** and follow its workflow."
+> "Load skill **chsh-sk-ncs-4-test-verification** and follow its workflow."
 
 Then stop — do not attempt to run the verification yourself.
 

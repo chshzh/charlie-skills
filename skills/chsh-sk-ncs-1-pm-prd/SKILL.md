@@ -1,9 +1,9 @@
 ---
-name: chsh-sk-ncs-1-prd
+name: chsh-sk-ncs-1-pm-prd
 description: Use when creating a new PRD, adding or changing a feature, or syncing the PRD after code changes. Interactive PRD authoring for NCS IoT projects — guides the Product Manager through creating, extending, or updating PRD.md under docs/. No coding knowledge required.
 ---
 
-# chsh-sk-ncs-1-prd — Interactive PRD Workflow
+# chsh-sk-ncs-1-pm-prd — Interactive PRD Workflow
 
 This skill is for the **Product Manager** role. It asks questions in plain language
 and maintains a single `PRD.md` in `docs/` with a built-in Changelog table.
@@ -33,7 +33,7 @@ Step 0: Detect state
                             │
                             ▼
                    Handoff AskQuestion
-                   Run chsh-sk-ncs-2-spec? Yes / No
+                   Run chsh-sk-ncs-2-dev-spec? Yes / No
 ```
 
 ---
@@ -115,8 +115,8 @@ Ask for 3–5 things that prove the product is working well.
 Examples: "connects within 30 seconds", "page loads under 2 seconds", "runs for 24 hours without restart".
 
 For each metric, assign a **Verified by** column:
-- Build-only metrics (compiler errors, `west build -p`) → `**chsh-sk-ncs-4.1-verification** — build verification step`
-- Runtime / hardware metrics (latency, connection time, audio quality) → `**chsh-sk-ncs-4.2-validation** — hardware runtime scenario`
+- Build-only metrics (compiler errors, `west build -p`) → `**chsh-sk-ncs-4-test-verification** — build verification step`
+- Runtime / hardware metrics (latency, connection time, audio quality) → `**chsh-sk-ncs-4-test-validation** — hardware runtime scenario`
 
 ### A9. Release Criteria
 Ask: which P0 requirements must all pass before the product can be released?
@@ -238,9 +238,9 @@ After any mode:
 6. Call `AskQuestion`:
    ```
    AskQuestion:
-     prompt: "PRD updated. Run chsh-sk-ncs-2-spec now to update engineering specs?"
+     prompt: "PRD updated. Run chsh-sk-ncs-2-dev-spec now to update engineering specs?"
      options:
-       - "Yes — load chsh-sk-ncs-2-spec"
+       - "Yes — load chsh-sk-ncs-2-dev-spec"
        - "No — stop here"
    ```
 
@@ -252,7 +252,7 @@ Before handing off, verify the PRD meets these criteria.
 
 ### Completeness
 - [ ] Every FR has at least 2 acceptance criteria that can be tested without reading the code
-- [ ] Success metrics have numeric targets, a measurable method, and a **Verified by** column (`chsh-sk-ncs-4.1-verification` or `chsh-sk-ncs-4.2-validation`)
+- [ ] Success metrics have numeric targets, a measurable method, and a **Verified by** column (`chsh-sk-ncs-4-test-verification` or `chsh-sk-ncs-4-test-validation`)
 - [ ] Assumptions are listed (even obvious ones) and sorted High → Medium → Low risk
 - [ ] Out-of-scope items are explicitly named
 - [ ] Release criteria (P0 gate) are listed
@@ -280,10 +280,10 @@ Before handing off, verify the PRD meets these criteria.
 
 | Task | Skill |
 |------|-------|
-| Translate PRD to engineering specs | `chsh-sk-ncs-2-spec` |
-| Implement code from specs | `chsh-sk-ncs-3.1-coding` |
-| Build verification (no hardware) | `chsh-sk-ncs-4.1-verification` |
-| Test report from PRD acceptance criteria (hardware) | `chsh-sk-ncs-4.2-validation` |
+| Translate PRD to engineering specs | `chsh-sk-ncs-2-dev-spec` |
+| Implement code from specs | `chsh-sk-ncs-3-dev-coding` |
+| Build verification (no hardware) | `chsh-sk-ncs-4-test-verification` |
+| Test report from PRD acceptance criteria (hardware) | `chsh-sk-ncs-4-test-validation` |
 | Full project lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Self-Update Policy
@@ -295,7 +295,7 @@ If updates are warranted:
 2. Call `AskQuestion`:
    ```
    AskQuestion:
-     prompt: "Apply these self-update changes to chsh-sk-ncs-1-prd?"
+     prompt: "Apply these self-update changes to chsh-sk-ncs-1-pm-prd?"
      options:
        - "Yes — apply all"
        - "Yes — apply selected (describe below)"

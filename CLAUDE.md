@@ -95,12 +95,12 @@ Agent skills are reusable procedure files (`SKILL.md`) the agent reads before ex
 | Trigger | Skill |
 |---------|-------|
 | Build / flash / west command | `chsh-sk-ncs-env` |
-| Debug WiFi / firmware crash | `chsh-sk-ncs-3.2-debug` |
+| Debug WiFi / firmware crash | `chsh-sk-ncs-3-dev-debug` |
 | NCS version upgrade | `chsh-sk-ncs-migrate` |
 | Memfault OTA release | `chsh-sk-memfault` |
-| Git commit / push | `chsh-sk-ncs-3.4-git` |
+| Git commit / push | `chsh-sk-ncs-git-commit` |
 | New NCS feature → code | `chsh-sk-ncs-0-workflow` |
-| Hardware validation tests | `chsh-sk-ncs-4.2-validation` |
+| Hardware validation tests | `chsh-sk-ncs-4-test-validation` |
 
 Skills path: `.claude/skills/` (relative to workspace root)
 

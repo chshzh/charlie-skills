@@ -95,7 +95,7 @@
 
 > One or two sentences: which scenarios are believed to be the worst-case memory consumers
 > for this project (from the specs) and why the ZView round exercises them concurrently —
-> so the captured watermarks are the true peaks that `chsh-sk-ncs-3.3-memopt` will size against.
+> so the captured watermarks are the true peaks that `chsh-sk-ncs-3-dev-memopt` will size against.
 
 ---
 

@@ -13,7 +13,7 @@ smoke test on hardware. Never claim a migration is done without flashing.
 
 > **Prerequisite**: A working baseline of the application on its current NCS
 > version. If the baseline does not build/run, **fix it first** — don't
-> migrate broken code. Use `chsh-sk-ncs-3.2-debug` to triage.
+> migrate broken code. Use `chsh-sk-ncs-3-dev-debug` to triage.
 
 ---
 
@@ -76,7 +76,7 @@ nrfutil sdk-manager toolchain launch --ncs-version=v<source> -- \
 ```
 
 Flash and run a functional smoke test on hardware (boot → shell prompt → one
-feature command; for the full hardware suite see **chsh-sk-ncs-4.2-validation**).
+feature command; for the full hardware suite see **chsh-sk-ncs-4-test-validation**).
 Save the UART log as the baseline reference. **Do not proceed if the baseline
 fails.**
 
@@ -201,7 +201,7 @@ baseline log — first divergence identifies the regression.
 
 ### 2f. Commit the hop
 
-Use **chsh-sk-ncs-3.4-git-commit**:
+Use **chsh-sk-ncs-git-commit**:
 
 ```bash
 git -C <app> tag migrated-v<target>
@@ -231,11 +231,11 @@ Otherwise → **Step 3**.
 A smoke test per hop is not enough for a final delivery. After the last hop:
 
 1. Run the loop test for stability (≥ 10 passes for acceptance, 20 for
-   release) — see **chsh-sk-ncs-3.2-debug** Mode F
-2. Run the static Phase 4.1 verification (code review, clean build, doc audit
-   — no hardware) from **chsh-sk-ncs-4.1-verification**, then the full hardware
-   validation against the PRD acceptance criteria from **chsh-sk-ncs-4.2-validation**
-3. If a release is expected: tag and publish via **chsh-sk-ncs-3.5-release**
+   release) — see **chsh-sk-ncs-3-dev-debug** Mode F
+2. Run the static verification (code review, clean build, doc audit
+   — no hardware) from **chsh-sk-ncs-4-test-verification**, then the full hardware
+   validation against the PRD acceptance criteria from **chsh-sk-ncs-4-test-validation**
+3. If a release is expected: tag and publish via **chsh-sk-ncs-git-release**
 
 ---
 
@@ -321,10 +321,10 @@ Do **not** modify this skill mid-conversation unless the user explicitly asks.
 | Task | Skill |
 |------|-------|
 | Toolchain install + west command wrapper | `chsh-sk-ncs-env` |
-| Build/runtime debugging during migration | `chsh-sk-ncs-3.2-debug` |
-| Static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4.1-verification` |
-| Hardware validation against PRD acceptance criteria | `chsh-sk-ncs-4.2-validation` |
-| Per-hop commit | `chsh-sk-ncs-3.4-git-commit` |
-| Final release after migration | `chsh-sk-ncs-3.5-release` |
-| Update specs if migration changes architecture | `chsh-sk-ncs-2-spec` |
-| Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-3.3-memopt` |
+| Build/runtime debugging during migration | `chsh-sk-ncs-3-dev-debug` |
+| Static verification (code review, clean build, doc audit — no hardware) | `chsh-sk-ncs-4-test-verification` |
+| Hardware validation against PRD acceptance criteria | `chsh-sk-ncs-4-test-validation` |
+| Per-hop commit | `chsh-sk-ncs-git-commit` |
+| Final release after migration | `chsh-sk-ncs-git-release` |
+| Update specs if migration changes architecture | `chsh-sk-ncs-2-dev-spec` |
+| Optimize after migration (heap/stack defaults change) | `chsh-sk-ncs-3-dev-memopt` |

@@ -48,10 +48,10 @@
 
 | Metric | Target | How to measure | Verified by |
 |---|---|---|---|
-| e.g. All builds succeed | Zero compiler errors | `west build -p` on all targets | **chsh-sk-ncs-4.1-verification** — build verification step |
-| e.g. Dashboard loads | < 2 seconds | Manual test with stopwatch | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
-| e.g. Wi-Fi connects | < 30 seconds from power-on | UART log timestamp | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
-| e.g. Works without restart | 24 hours | Leave running overnight | **chsh-sk-ncs-4.2-validation** — hardware runtime scenario |
+| e.g. All builds succeed | Zero compiler errors | `west build -p` on all targets | **chsh-sk-ncs-4-test-verification** — build verification step |
+| e.g. Dashboard loads | < 2 seconds | Manual test with stopwatch | **chsh-sk-ncs-4-test-validation** — hardware runtime scenario |
+| e.g. Wi-Fi connects | < 30 seconds from power-on | UART log timestamp | **chsh-sk-ncs-4-test-validation** — hardware runtime scenario |
+| e.g. Works without restart | 24 hours | Leave running overnight | **chsh-sk-ncs-4-test-validation** — hardware runtime scenario |
 
 ### 1.5 Assumptions
 

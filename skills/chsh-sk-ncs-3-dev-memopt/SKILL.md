@@ -1,5 +1,5 @@
 ---
-name: chsh-sk-ncs-3.3-memopt
+name: chsh-sk-ncs-3-dev-memopt
 description: Use when analyzing RAM/Flash usage, reducing memory footprint, debugging stack overflows, or investigating memory-related crashes in nRF projects. Optimizes and debugs memory usage in Nordic NCS applications.
 ---
 
@@ -18,7 +18,7 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 ## Workflow
 
 > **Output: `docs/dev-specs/3-memopt.md`** — this skill is the single writer of that file. The
-> design phase (`chsh-sk-ncs-2-spec`) first generates `3-memopt.md` as a sizing spec; here you
+> design phase (`chsh-sk-ncs-2-dev-spec`) first generates `3-memopt.md` as a sizing spec; here you
 > **update the same file** in place with measured watermarks and the `prj.conf` changes applied,
 > using `MEMOPT_REPORT_TEMPLATE.md` as the content template. Do not create a separate
 > `MEMOPT_REPORT.md`.
@@ -28,7 +28,7 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 Before measuring anything yourself, check for `docs/qa-test/VALIDATION_REPORT.md`. If it has a
 populated **Memory Watermarks** section, that is the **primary** input — those peaks were
 captured by ZView during the validation high-memory round under worst-case concurrent load
-(`chsh-sk-ncs-4.2-validation`), which is exactly the scenario you want to size against.
+(`chsh-sk-ncs-4-test-validation`), which is exactly the scenario you want to size against.
 
 - Use its per-board peak thread stacks and heap peaks directly; its columns map 1:1 onto the
   Thread Stack / Heap Analysis tables below.
@@ -82,7 +82,7 @@ Always measure on the target board with the Release build and representative wor
 
 ZView reads thread stack watermarks and heap usage **over SWD (J-Link), no UART/RTT, no on-target
 code** — ideal for watching memory live while you exercise the app during optimization.
-(For unattended peak capture during validation, `chsh-sk-ncs-4.2-validation` uses `record`/`dump`.)
+(For unattended peak capture during validation, `chsh-sk-ncs-4-test-validation` uses `record`/`dump`.)
 
 ### 0. Check it's installed (remind to install if not)
 
@@ -291,10 +291,10 @@ Create `pm_static.yml` (or `pm_static_<board>.yml`) for custom partition sizes.
 After applying sizing changes to `prj.conf` / `pm_static.yml` and updating
 `docs/dev-specs/3-memopt.md`, close the loop:
 
-- **Re-validate on hardware** — `chsh-sk-ncs-4.2-validation` (re-capture watermarks under
+- **Re-validate on hardware** — `chsh-sk-ncs-4-test-validation` (re-capture watermarks under
   worst-case load to confirm the new sizes hold).
-- **Re-verify clean build** — `chsh-sk-ncs-4.1-verification` (code review, clean build, doc audit).
-- **Commit** — `chsh-sk-ncs-3.4-git-commit`.
+- **Re-verify clean build** — `chsh-sk-ncs-4-test-verification` (code review, clean build, doc audit).
+- **Commit** — `chsh-sk-ncs-git-commit`.
 
 ## Self-Update Policy
 

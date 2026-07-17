@@ -98,15 +98,15 @@ Serial:       /dev/tty.usbmodem…1  @ 115200  rtscts=True    (shell on)
 
 **Root cause (if known)**:
 **Suggested fix / routing**:
-- [ ] Code fix → Phase 3 (`chsh-sk-ncs-3.1-coding`)
-- [ ] Spec gap → Phase 2 (`chsh-sk-ncs-2-spec`)
-- [ ] PRD change → Phase 1 (`chsh-sk-ncs-1-prd`)
+- [ ] Code fix → Phase 3 (`chsh-sk-ncs-3-dev-coding`)
+- [ ] Spec gap → Phase 2 (`chsh-sk-ncs-2-dev-spec`)
+- [ ] PRD change → Phase 1 (`chsh-sk-ncs-1-pm-prd`)
 
 ---
 
 ## Memory Watermarks (ZView)
 
-> **Hand-off contract for `chsh-sk-ncs-3.3-memopt`.** Captured by ZView over SWD during the
+> **Hand-off contract for `chsh-sk-ncs-3-dev-memopt`.** Captured by ZView over SWD during the
 > high-memory round(s) of VALIDATION_PLAN.md — these are true peaks under worst-case load.
 > Columns mirror MEMOPT_REPORT_TEMPLATE so 3.3 can ingest directly. Skip this section
 > (mark `[SKIP — no ZView pass]`) only if the ZView memory pass was not run.
@@ -159,10 +159,10 @@ Serial:       /dev/tty.usbmodem…1  @ 115200  rtscts=True    (shell on)
 
 | Finding | Priority | Route |
 |---------|----------|-------|
-| P0 TC fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3.1-coding`) |
-| P0 TC fails (spec gap) | P0 | Phase 2 (`chsh-sk-ncs-2-spec`) |
+| P0 TC fails (code bug) | P0 | Phase 3 (`chsh-sk-ncs-3-dev-coding`) |
+| P0 TC fails (spec gap) | P0 | Phase 2 (`chsh-sk-ncs-2-dev-spec`) |
 | Build/flash fails on a board | P0 | Phase 3 |
-| PRD criterion ambiguous | P1 | Phase 1 (`chsh-sk-ncs-1-prd`) |
-| Thread/heap at CRITICAL risk | P1 | Phase 3.3 (`chsh-sk-ncs-3.3-memopt`) — feed this report |
+| PRD criterion ambiguous | P1 | Phase 1 (`chsh-sk-ncs-1-pm-prd`) |
+| Thread/heap at CRITICAL risk | P1 | Phase 3.3 (`chsh-sk-ncs-3-dev-memopt`) — feed this report |
 | P1/P2 failures only | P2 | Phase 3 (next iteration) |
-| All P0 TCs pass | ✅ | Ready for release (`chsh-sk-ncs-3.5-release`) |
+| All P0 TCs pass | ✅ | Ready for release (`chsh-sk-ncs-git-release`) |

@@ -1,13 +1,13 @@
 ---
-name: chsh-sk-ncs-2-spec
+name: chsh-sk-ncs-2-dev-spec
 description: Use when starting a new project design, updating specs after a PRD change, or documenting an existing codebase's design. Translates a PRD into engineering specs — 0-overview, 1-architecture, 2-dts-partition, 3-memopt, and per-module specs for app modules and library wrappers.
 ---
 
-# chsh-sk-ncs-2-spec — Technical Design Workflow
+# chsh-sk-ncs-2-dev-spec — Technical Design Workflow
 
 Turns the product requirements in `docs/pm-prd/PRD.md` into the engineering specifications
 that drive implementation. Specs live in `docs/dev-specs/` and are the contract
-between design (this skill) and implementation (`chsh-sk-ncs-3.1-coding`).
+between design (this skill) and implementation (`chsh-sk-ncs-3-dev-coding`).
 
 ## Decision Flow
 
@@ -24,7 +24,7 @@ Step 0: Detect context
                             │
                             ▼
                    Handoff AskQuestion
-                   Run chsh-sk-ncs-3.1-coding? Yes / No
+                   Run chsh-sk-ncs-3-dev-coding? Yes / No
 ```
 
 ---
@@ -68,7 +68,7 @@ Load `docs/pm-prd/PRD.md`. Extract:
 - Non-functional requirements: memory headroom, latency targets, security notes
 
 If no PRD exists, stop:
-> "No PRD found at `docs/pm-prd/PRD.md`. Please run **chsh-sk-ncs-1-prd** first."
+> "No PRD found at `docs/pm-prd/PRD.md`. Please run **chsh-sk-ncs-1-pm-prd** first."
 
 ### A2. Plan the spec set
 
@@ -173,7 +173,7 @@ Add the changelog entry (initial version, today's date).
 
 Always required. Documents the memory budget and optimization history for the project.
 
-> At design time this is the initial estimate. `chsh-sk-ncs-3.3-memopt` is the single writer of measured values and **updates this same file** (`docs/dev-specs/3-memopt.md`) after a build — do not create a separate report.
+> At design time this is the initial estimate. `chsh-sk-ncs-3-dev-memopt` is the single writer of measured values and **updates this same file** (`docs/dev-specs/3-memopt.md`) after a build — do not create a separate report.
 
 Use `3-MEMOPT_TEMPLATE.md` as the base. Fill in:
 
@@ -225,9 +225,9 @@ After all specs are generated:
 3. Call `AskQuestion`:
    ```
    AskQuestion:
-     prompt: "Specs ready. Run chsh-sk-ncs-3.1-coding now to implement?"
+     prompt: "Specs ready. Run chsh-sk-ncs-3-dev-coding now to implement?"
      options:
-       - "Yes — load chsh-sk-ncs-3.1-coding"
+       - "Yes — load chsh-sk-ncs-3-dev-coding"
        - "No — stop here"
    ```
 
@@ -286,9 +286,9 @@ Always update `0-overview.md`:
 
 ```
 AskQuestion:
-  prompt: "Specs updated. Run chsh-sk-ncs-3.1-coding now to implement?"
+  prompt: "Specs updated. Run chsh-sk-ncs-3-dev-coding now to implement?"
   options:
-    - "Yes — load chsh-sk-ncs-3.1-coding"
+    - "Yes — load chsh-sk-ncs-3-dev-coding"
     - "No — stop here"
 ```
 
@@ -336,7 +336,7 @@ Rules:
 
 ## Spec Quality Checklist
 
-Use this checklist before handing off specs to `chsh-sk-ncs-3.1-coding`.
+Use this checklist before handing off specs to `chsh-sk-ncs-3-dev-coding`.
 
 > **Reminder**: The spec covers HOW. The PRD covers WHAT. A good spec answers every question a developer needs to write code — without them having to re-read the PRD.
 
@@ -382,9 +382,9 @@ Specs longer than these targets often contain PRD content that belongs in `docs/
 
 | Task | Skill |
 |------|-------|
-| Write product requirements | `chsh-sk-ncs-1-prd` |
-| Implement code from specs | `chsh-sk-ncs-3.1-coding` |
-| Commit and push changes | `chsh-sk-ncs-3.4-git-commit` |
+| Write product requirements | `chsh-sk-ncs-1-pm-prd` |
+| Implement code from specs | `chsh-sk-ncs-3-dev-coding` |
+| Commit and push changes | `chsh-sk-ncs-git-commit` |
 | Full project lifecycle orchestration | `chsh-sk-ncs-0-workflow` |
 
 ## Gotchas
@@ -404,7 +404,7 @@ If updates are warranted:
 2. Call `AskQuestion`:
    ```
    AskQuestion:
-     prompt: "Apply these self-update changes to chsh-sk-ncs-2-spec?"
+     prompt: "Apply these self-update changes to chsh-sk-ncs-2-dev-spec?"
      options:
        - "Yes — apply all"
        - "Yes — apply selected (describe below)"

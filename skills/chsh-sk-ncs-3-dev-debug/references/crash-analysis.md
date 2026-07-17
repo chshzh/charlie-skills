@@ -1,7 +1,7 @@
 # Crash and Hardfault Analysis
 
 Detailed crash diagnosis for NCS/Zephyr applications on Nordic hardware.
-Referenced from [chsh-sk-ncs-3.2-debug Mode C](../SKILL.md#mode-c--crash-and-hardfault-analysis).
+Referenced from [chsh-sk-ncs-3-dev-debug Mode C](../SKILL.md#mode-c--crash-and-hardfault-analysis).
 
 ## C1. Enable crash logging
 

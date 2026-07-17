@@ -1,7 +1,7 @@
 # UART Logs and WiFi Debugging
 
 Verbose Kconfig, task templates, error pattern table, and reconnect stability test.
-Referenced from [chsh-sk-ncs-3.2-debug Mode B](../SKILL.md#mode-b--uart-logs-and-wifi-debugging).
+Referenced from [chsh-sk-ncs-3-dev-debug Mode B](../SKILL.md#mode-b--uart-logs-and-wifi-debugging).
 
 
 ### B1. Enable verbose logging

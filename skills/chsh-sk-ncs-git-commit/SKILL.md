@@ -1,5 +1,5 @@
 ---
-name: chsh-sk-ncs-3.4-git-commit
+name: chsh-sk-ncs-git-commit
 description: Use when the user asks to commit, push, prepare commits, split commits, or wrap up work. Works for any git repo. Auto-detects commit style: Conventional Commits (app/general repos), Zephyr style (NCS/Zephyr workspace repos). Delegates to chsh-ag-git.
 ---
 
@@ -72,9 +72,9 @@ The subagent does **not** watch CI or flash firmware. For those next steps:
 
 | Need | Use |
 |---|---|
-| Watch CI, fix failures, loop | `chsh-sk-ncs-3.5-release` |
-| Flash pre-built artifact + UART verify | `chsh-sk-ncs-3.2-debug` Mode G |
-| Full release (tag → CI → artifact) | `chsh-sk-ncs-3.5-release` |
+| Watch CI, fix failures, loop | `chsh-sk-ncs-git-release` |
+| Flash pre-built artifact + UART verify | `chsh-sk-ncs-3-dev-debug` Mode G |
+| Full release (tag → CI → artifact) | `chsh-sk-ncs-git-release` |
 
 > **Firmware repos only:** CI green is not enough — always flash the pre-built
 > artifact and verify `uart:~$` on the correct VCOM port before marking done.

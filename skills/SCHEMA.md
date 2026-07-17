@@ -5,7 +5,7 @@ Personal Agent Skills for Claude Code. Each skill encodes a specialized workflow
 domain procedure, or quality standard that the agent loads on demand.
 
 ## Conventions
-- Directory names: lowercase, hyphens, max 64 chars (e.g., `chsh-sk-ncs-3.2-debug`)
+- Directory names: lowercase, hyphens, max 64 chars (e.g., `chsh-sk-ncs-3-dev-debug`)
 - `name:` frontmatter must exactly match the directory name
 - Every skill lives in its own directory with at minimum `SKILL.md`
 - Supporting files go inside the skill directory: `references/`, `scripts/`
