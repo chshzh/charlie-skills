@@ -66,11 +66,31 @@ This default applies to `nordic-wifi-memfault` at
 
 ---
 
+## Default Workflow (release version invocation)
+
+When the user invokes this skill with a **release/tag version** reference (e.g.
+"use release v3.4.0.1", "release v3.4.0.1 artifacts") **without specifying a
+workflow**, execute this sequence automatically — no rebuild, no further
+clarification needed:
+
+1. **Download** artifacts from the GitHub release using the Download pattern
+   above (`gh release download <VER> ... --pattern "*.elf" --pattern "*.signed.bin"`)
+2. **Delegate to `chsh-ag-memfault`** — Workflow B for that version, nord-project
+   only (unless the user supplies terr-project credentials), using the
+   downloaded artifacts directly (no rebuild)
+
+This assumes CI already built and published the release (i.e. the tag has a
+GitHub Release with `.elf`/`.signed.bin` assets attached) — verify with
+`mcp_github_mcp_se_get_release_by_tag` first if unsure.
+
+---
+
 ## Quick reference
 
 | Scenario | Workflow | Rebuild needed? |
 |----------|----------|-----------------|
 | Default (project folder, no explicit task) | Rebuild → Flash → A | Yes |
+| Default (release version, no explicit task) | Download → B | No |
 | Debug crash (symbol-only) | A | Only if artifacts are missing |
 | Release (symbols + OTA + deploy) | B | Yes if re-releasing same version |
 | Stop an OTA update mid-rollout | C | No |
@@ -84,6 +104,7 @@ Read the user's request and decide:
 | User says | Target workflow |
 |-----------|----------------|
 | Project folder only, no specific task | Default: Rebuild → Flash → Workflow A |
+| Release/tag version only (e.g. "use release v3.4.0.1 artifacts"), no specific task | Default: Download → Workflow B |
 | "upload symbols", "debug crash", "decode coredump" | Workflow A |
 | "release", "publish", "upload OTA", "deploy" | Workflow B |
 | "disable release", "abort OTA", "stop update", "pull deployment" | Workflow C |
