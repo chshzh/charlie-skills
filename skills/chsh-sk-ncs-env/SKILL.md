@@ -213,6 +213,50 @@ cd /path/to/project && west build -b <board> -p
 
 ## Troubleshooting
 
+### nanopb/protobuf generation fails with "Plugin output is unparseable"
+
+Symptom: `west build` fails during nanopb code generation (e.g. `wifi_prov`, CDR modules) with
+`Failed to import nanopb_pb2.py: type object 'FileOptions' has no attribute 'RegisterExtension'`
+followed by `protoc-gen-nanopb: Plugin output is unparseable: libprotoc ...`.
+
+Cause: the toolchain's bundled Python picks up a **newer `protobuf`/`grpcio-tools` package from
+the user's own site-packages** (e.g. `~/Library/Python/3.9/lib/python/site-packages`), which is
+binary-incompatible with the older nanopb generator shipped in the toolchain.
+
+Fix: export `PYTHONNOUSERSITE=1` before running `west build` so the toolchain's isolated Python
+doesn't see the user's site-packages:
+
+```sh
+export PYTHONNOUSERSITE=1
+```
+
+### Forcing a Kconfig choice member (e.g. C library) that keeps reverting
+
+If a `.conf` file (prj.conf, board `.conf`, `EXTRA_CONF_FILE`) sets a choice member (e.g.
+`CONFIG_NEWLIB_LIBC=y` to override the default Picolibc) but the resulting `.config` still shows
+the *other* member enabled, some other Kconfig `default` in the graph is winning at merge time.
+
+Two fixes, in order of preference:
+1. **Explicitly negate the other choice members too**, not just enable the one you want:
+   ```properties
+   CONFIG_PICOLIBC=n
+   CONFIG_MINIMAL_LIBC=n
+   CONFIG_NEWLIB_LIBC=y
+   ```
+   Setting only `CONFIG_NEWLIB_LIBC=y` can silently fail to stick; explicitly setting the losing
+   members to `n` in the same `.conf` file reliably registers the whole choice as user-set.
+2. If that still doesn't stick, force it via a **CMake cache variable** on the command line, which
+   takes priority over all `.conf` file merging:
+   ```sh
+   west build ... -- -DCONFIG_NEWLIB_LIBC=y
+   ```
+
+Symptom this fixes on older NCS/Zephyr + Picolibc combinations: hostap's `os_zephyr.c` failing
+with `redefinition of 'union sigval'` / `struct sigevent` — Picolibc's own `<signal.h>`/
+`<sys/select.h>` collide with Zephyr's posix compat layer. Switching to Newlib (which is what
+`nrf/modules/hostap/Kconfig` itself recommends via `choice LIBC_IMPLEMENTATION default
+NEWLIB_LIBC`) avoids the collision.
+
 ### Permanent fix: toolchain git priority (VS Code extension terminals)
 
 The nRF Connect extension sets `GIT_EXEC_PATH` correctly but **appends** the toolchain
