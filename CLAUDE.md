@@ -63,7 +63,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Wiki
 
-This project has a persistent engineering knowledge base at `.claude/wiki/` (28 pages).
+This project has a persistent engineering knowledge base at `.claude/wiki
 
 **At the start of every non-trivial session**, orient before acting:
 1. Read `.claude/wiki/index.md` to see what experience pages exist
@@ -81,27 +81,3 @@ This project has a persistent engineering knowledge base at `.claude/wiki/` (28 
 
 Wiki path: `.claude/wiki/` (relative to workspace root)
 Link format: `[page-name](relative-path.md)` — standard markdown, NOT `[[wikilinks]]`
-
----
-
-## Skills
-
-Agent skills are reusable procedure files (`SKILL.md`) the agent reads before executing a specialized workflow (commit, release, debug, OTA, etc.).
-
-**Full skill index:** `.claude/skills/index.md` — categorized list of all skills with one-line triggers.
-
-**When to use a skill:** When the user's request matches a skill trigger, load its `SKILL.md` with `read_file` before acting. Key skills for this workspace:
-
-| Trigger | Skill |
-|---------|-------|
-| Build / flash / west command | `chsh-sk-ncs-env` |
-| Debug WiFi / firmware crash | `chsh-sk-ncs-3-dev-debug` |
-| NCS version upgrade | `chsh-sk-ncs-migrate` |
-| Memfault OTA release | `chsh-sk-memfault` |
-| Git commit / push | `chsh-sk-ncs-git-commit` |
-| New NCS feature → code | `chsh-sk-ncs-0-workflow` |
-| Hardware validation tests | `chsh-sk-ncs-4-test-validation` |
-
-Skills path: `.claude/skills/` (relative to workspace root)
-
----
