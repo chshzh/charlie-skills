@@ -63,21 +63,17 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Wiki
 
-This project has a persistent engineering knowledge base at `.claude/wiki
+You maintain a persistent knowledge/experience base at `~/.claude/wiki/` — not
+project-specific; it grows with whatever domain you're working in.
 
 **At the start of every non-trivial session**, orient before acting:
-1. Read `.claude/wiki/index.md` to see what experience pages exist
-2. Read the relevant page(s) for the task:
-   - Building / Kconfig / west? → `concepts/ncs-build-system`
-   - WiFi failures / provisioner / P2P? → `concepts/wifi-debugging-patterns`
-   - NCS version upgrade? → `concepts/ncs-version-migration`
-   - Memfault upload / OTA deploy? → `concepts/memfault-workflow`
-   - Which board to target? → `entities/nrf7002dk` or `entities/nrf54lm20dk-plus-nrf7002eb2`
-   - Homelab / Hermes / Docker? → relevant concept page in `concepts/`
+1. Read `~/.claude/wiki/index.md` and read whatever page(s) are relevant to the
+   current task. Don't guess a page path from memory — the index is the only
+   thing that stays current as pages get added, renamed, or merged.
 
 **After resolving a non-trivial problem**, update the wiki:
 1. Edit or create the relevant page with what was learned
-2. Append a one-line entry to `.claude/wiki/log.md`
+2. Append a one-line entry to `~/.claude/wiki/log.md`
 
-Wiki path: `.claude/wiki/` (relative to workspace root)
+Wiki path: `~/.claude/wiki/` (fixed location — shared across all projects, not per-project)
 Link format: `[page-name](relative-path.md)` — standard markdown, NOT `[[wikilinks]]`
