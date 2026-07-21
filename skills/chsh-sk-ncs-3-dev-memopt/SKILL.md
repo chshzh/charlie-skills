@@ -9,7 +9,7 @@ description: Use when analyzing RAM/Flash usage, reducing memory footprint, debu
 
 1. **Set up NCS environment first** — use `chsh-sk-ncs-env`
 2. **Build Release mode** for accurate Flash measurements (Debug builds are larger)
-3. **Measure before optimizing** — Thread Analyzer and `heap_monitor` first
+3. **Measure before optimizing** — Thread Analyzer and `zego/bricks/memonitor` first
 
 > **Knowledge sources**: Call `mcp__claude_ai_Nordic_MCP__nordicsemi_workflow_ncs` at the start of each session — loads `nrfutil-manual` and `embedded-code-guidance-ncs-zephyr`. Use `mcp__claude_ai_Nordic_MCP__nordicsemi_search_sources` for Kconfig symbols and memory-related config options.
 
@@ -36,8 +36,8 @@ captured by ZView during the validation high-memory round under worst-case concu
 - Honour any "thread not active during the round" note — keep the prior value for that thread.
 - Record provenance in the report `Source` field: `VALIDATION_REPORT.md v<version>`.
 
-Fall back to your own capture (Steps 1–4 below: Thread Analyzer + `heap_monitor`) only when no
-validation report exists, or to re-measure a thread the validation round didn't exercise.
+Fall back to your own capture (Steps 1–4 below: Thread Analyzer + `zego/bricks/memonitor`) only
+when no validation report exists, or to re-measure a thread the validation round didn't exercise.
 
 ### Step 1 — Build and check summary
 
@@ -234,14 +234,20 @@ grep "HEAP_MEM_POOL_ADD_SIZE" build/zephyr/.config
 
 ### Size production heap from measured peak
 
-1. Enable `heap_monitor` module (copy from `ncs-project-logo`, see [reference/heap-monitor.md](reference/heap-monitor.md))
+1. Enable the `zego/bricks/memonitor` brick: `CONFIG_ZEGO_MEMONITOR=y` +
+   `CONFIG_ZEGO_MEMONITOR_LOG_PERIODIC=y` for UART logging (or read via ZView /
+   `memonitor_get_heaps()` if the app already exposes it — see
+   [reference/heap-monitor.md](reference/heap-monitor.md) for the full picture)
 2. Flash and exercise all code paths on **all target boards**
-3. Read the `peak=` field from UART logs — **not** `used=` (live snapshot). Use the worst-case peak across all boards.
+3. Read the `hwm=` (high-water mark) field — **not** the live snapshot next to it.
+   Use the worst-case peak across all boards. Unlike the older `heap_monitor`
+   module, memonitor has no threshold-triggered warning log — you have to read
+   the percentage yourself each interval.
 4. Production heap = `floor(peak / 0.8)` minimum (20% headroom, ×1.25 of peak); 1.5× if flash budget allows
 
 ```
-<inf> heap_monitor: System Heap: used=51712/98304 (52%) peak=64752/98304 (65%)
-<wrn> heap_monitor: System Heap: used=86500/98304 (88%) peak=86500/98304 (88%)
+<inf> memonitor: heap _system_heap             hwm=64752/98304 ( 65%)
+<inf> memonitor: heap mbedtls_heap             hwm=72684/110592 ( 65%)
 ```
 
 Formula with embedded rationale in `prj.conf`:

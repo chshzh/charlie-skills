@@ -99,9 +99,11 @@ CONFIG_LOG=y
 CONFIG_LOG_DEFAULT_LEVEL=4
 CONFIG_THREAD_ANALYZER=y
 CONFIG_THREAD_NAME=y
-CONFIG_STACK_SENTINEL=y
+CONFIG_STACK_SENTINEL=y          # overflow detection — incompatible with memonitor's thread
+                                 # watermarks below (overwrites the 0xaa fill; every thread
+                                 # reports 100%). Set =n instead if using CONFIG_ZEGO_MEMONITOR.
 CONFIG_SYS_HEAP_VALIDATE=y
-CONFIG_HEAPS_MONITOR=y
+CONFIG_ZEGO_MEMONITOR=y
 ```
 
 ### Production (minimal footprint)
@@ -113,7 +115,7 @@ CONFIG_ASSERT=n
 CONFIG_LOG=n
 CONFIG_PRINTK=n
 CONFIG_SHELL=n
-CONFIG_HEAPS_MONITOR=n
+CONFIG_ZEGO_MEMONITOR=n
 ```
 
 Build:
