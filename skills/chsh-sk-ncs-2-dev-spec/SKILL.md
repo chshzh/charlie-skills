@@ -39,12 +39,18 @@ Check what exists before choosing a mode:
 cat docs/pm-prd/PRD.md                    # product requirements
 ls docs/dev-specs/ 2>/dev/null         # existing specs
 git log --oneline -5                             # recent commits
+
+# Anchor on the pin's bump commit — catches code that moved past specs directly,
+# independent of whether PRD changed at all.
+SPEC_PIN_BUMP_SHA=$(git log -1 --format='%H' -G'CONFIG_APP_SPECS_VERSION' -- prj.conf 2>/dev/null)
+UNDECLARED=$([ -n "$SPEC_PIN_BUMP_SHA" ] && git log --oneline "${SPEC_PIN_BUMP_SHA}..HEAD" -- src/ 2>/dev/null)
 ```
 
 | Condition | Mode |
 |-----------|------|
 | No specs exist | **A — New Design** |
 | Specs exist, PRD has newer revision (check Changelog table) | **B — Update Specs** |
+| Specs exist, PRD unchanged, but `UNDECLARED` has at least one commit matching a `chsh-ag-git` Step 2.5 pattern | **B — Update Specs** (code-driven, not PRD-driven) |
 | Code exists, no specs → document what is built | **C — Reverse Design** |
 
 Ask the user to confirm the mode before proceeding.
@@ -221,8 +227,12 @@ Add the changelog entry (initial version, today's date).
 After all specs are generated:
 
 1. Present a summary table of all files created.
-2. Ask the user to review and approve the specs.
-3. Call `AskQuestion`:
+2. Check whether anything decided while writing these specs is user-visible but not
+   yet in the PRD (an error behavior, a timing detail, a mode the PRD didn't
+   anticipate). If so, flag it and offer **chsh-sk-ncs-1-pm-prd** (Mode D) before
+   implementation starts — a spec-level discovery shouldn't skip the PRD.
+3. Ask the user to review and approve the specs.
+4. Call `AskQuestion`:
    ```
    AskQuestion:
      prompt: "Specs ready. Run chsh-sk-ncs-3-dev-coding now to implement?"
@@ -239,9 +249,19 @@ Use when the PRD has a newer revision entry than the latest spec revision.
 
 ### B1. Identify the delta
 
+**If triggered by a newer PRD revision:**
 1. Read the PRD's **Changelog** table — note the new entries since the last spec update.
 2. Read each spec's **Changelog** table — note its current version date.
 3. For each FR in the PRD, check which spec covers it and whether the spec's acceptance criteria still match.
+
+**If triggered by code-driven drift instead** (PRD unchanged, but `UNDECLARED` from
+Step 0 has doc-relevant commits):
+1. Run `git log --oneline ${SPEC_PIN_BUMP_SHA}..HEAD -- src/` to list the commits.
+2. Classify each against `chsh-ag-git`'s Step 2.5 severity table; ignore any with no
+   pattern match.
+3. Read the matching commits' diffs directly — this is the delta, in place of a PRD
+   Changelog row.
+
 4. Present the gap table to the user:
 
 | PRD section | Spec file | Status | Gap |
@@ -283,6 +303,9 @@ Always update `0-overview.md`:
 - Add a Changelog entry to `0-overview.md`.
 
 ### B4. Handoff
+
+Before asking to proceed: if this update surfaced anything user-visible the PRD
+doesn't mention, offer **chsh-sk-ncs-1-pm-prd** (Mode D) first — same check as A8.
 
 ```
 AskQuestion:

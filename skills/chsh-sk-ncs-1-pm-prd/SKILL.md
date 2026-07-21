@@ -44,7 +44,12 @@ Check what exists in the project:
 
 ```bash
 cat docs/pm-prd/PRD.md 2>/dev/null           # existing PRD (check Changelog)
-git log --oneline -10 -- src/ prj.conf CMakeLists.txt    # recent code changes
+
+# Anchor on the pin's bump commit, not a raw date — a commit that doesn't touch the
+# pin line itself (-G matches the diff) shouldn't move the anchor and hide drift.
+PRD_PIN_BUMP_SHA=$(git log -1 --format='%H' -G'CONFIG_APP_PRD_VERSION' -- prj.conf 2>/dev/null)
+UNDECLARED=$([ -n "$PRD_PIN_BUMP_SHA" ] && git log --oneline "${PRD_PIN_BUMP_SHA}..HEAD" -- src/ 2>/dev/null)
+echo "$UNDECLARED"
 ```
 
 Present the user with the right starting options:
@@ -52,8 +57,11 @@ Present the user with the right starting options:
 | Situation | Offer |
 |-----------|-------|
 | No PRD exists yet | **New** |
-| PRD exists, no code changes after last PRD revision date | **Add Feature** or **Change Feature** |
-| PRD exists, code commits exist after its last revision date | **Update** (code moved ahead of PRD), **Add Feature**, or **Change Feature** |
+| PRD exists, `UNDECLARED` empty, or non-empty but no commit is user-visible (`chsh-ag-git`'s Step 2.5 "Phase 1+2" tier) | **Add Feature** or **Change Feature** |
+| PRD exists, `UNDECLARED` has at least one Phase-1+2 (user-visible) commit | **Update** (code moved ahead of PRD), **Add Feature**, or **Change Feature** |
+
+> If `prj.conf` doesn't exist yet or the pin was never committed (`PRD_PIN_BUMP_SHA`
+> empty), fall back to `git log --oneline --since="<last PRD revision>" -- src/`.
 
 Ask: *"Which would you like to do?"* — then follow the matching section below.
 
@@ -166,12 +174,18 @@ Use this when the developer has made code changes but the PRD has not been updat
 
 ### D1. Find the gap
 
-Read the **Changelog** table in `docs/pm-prd/PRD.md` to get the last PRD revision date.
-
 ```bash
-PRD_DATE=<last revision date from table>
-git log --oneline --since="$PRD_DATE" -- src/ prj.conf CMakeLists.txt Kconfig boards/
+PRD_PIN_BUMP_SHA=$(git log -1 --format='%H' -G'CONFIG_APP_PRD_VERSION' -- prj.conf 2>/dev/null)
+git log --oneline "${PRD_PIN_BUMP_SHA}..HEAD" -- src/ 2>/dev/null
 ```
+
+List every commit since the pin was last bumped, then keep only the ones matching a
+**Phase 1+2** (user-visible) pattern from `chsh-ag-git`'s Step 2.5 severity table —
+implementation-boundary-only commits (Phase 2 only: new Zbus channel, new Kconfig,
+new module dir) belong to specs, not the PRD.
+
+> If `prj.conf` doesn't exist yet or the pin was never committed, fall back to:
+> `git log --oneline --since="<last PRD revision date>" -- src/`.
 
 ### D2. Summarise what changed
 
