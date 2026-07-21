@@ -421,6 +421,20 @@ Or mount the NAS directory directly via NFS/SMB and symlink:
 ln -s /mnt/nas/wiki-raw ./wiki/raw
 ```
 
+**Live example — cloud-storage symlink instead of a NAS**: this wiki's `raw/` is a
+symlink into a cloud-storage-synced folder, which gives the same "synced outside
+git" property without a NAS:
+
+```bash
+ln -s "/Users/chsh/Library/CloudStorage/OneDrive-NordicSemiconductor/llm_wiki/raw" \
+      ~/.claude/wiki/raw
+```
+
+`.gitignore` must use the bare name `raw` (no trailing slash) — a trailing-slash
+pattern (`raw/`) only matches a real directory and silently fails to match a
+symlink of the same name, which then shows up as an untracked file in `git status`
+instead of being ignored.
+
 ### Integrity check after clone
 
 After cloning on a new machine, verify raw/ integrity:
@@ -461,10 +475,13 @@ Empty output = all sources intact.
   The agent should check log size during lint.
 - **Handle contradictions explicitly** — don't silently overwrite. Note both claims with dates,
   mark in frontmatter, flag for user review.
-- **Don't blanket-ignore `raw/` in git** — text sources (`raw/articles/*.md`) should
-  be tracked alongside wiki pages. Only ignore large binaries (PDFs, PPTXs, MHTML)
-  or use Git LFS for them. A blanket `wiki/raw/` ignore orphans source material on
-  clones that lack the directory.
+- **Don't blanket-ignore `raw/` in git unless something else is syncing it.** Text
+  sources (`raw/articles/*.md`) should normally be tracked alongside wiki pages;
+  only ignore large binaries (PDFs, PPTXs, MHTML) or use Git LFS for them. A blanket
+  `wiki/raw/` ignore orphans source material on clones that lack the directory —
+  **unless** `raw/` is a symlink into externally-synced storage (NAS, OneDrive,
+  iCloud), in which case the external sync provides the cross-machine consistency
+  git would otherwise be responsible for (Option B above).
 
 ## Related Tools
 
