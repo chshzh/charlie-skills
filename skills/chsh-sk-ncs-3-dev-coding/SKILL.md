@@ -2,15 +2,17 @@
 name: chsh-sk-ncs-3-dev-coding
 description: >-
   Load when implementing NCS project code from engineering specs. Reads specs
-  in docs/dev-specs/ and uses nordic-wifi-webdash and nordic-wifi-memfault as
-  reference implementations. Use when specs are ready and code needs to be
-  written or updated.
+  in docs/dev-specs/. Checks zego bricks (/opt/nordic/ncs/v3.4.0/zego/bricks/)
+  for reusable modules before writing new ones; uses nordic-wifi-webdash and
+  nordic-wifi-memfault as reference implementations for patterns not yet in a
+  brick. Use when specs are ready and code needs to be written or updated.
 ---
 
 # chsh-sk-ncs-3-dev-coding — NCS Code Implementation
 
 Implements NCS firmware from the engineering specs in `docs/dev-specs/`.
-Uses two real project repositories as reference implementations.
+Reuses **zego bricks** for common modules; falls back to two real project
+repositories as reference implementations for anything not yet extracted into a brick.
 
 > **Prerequisite**: `docs/dev-specs/1-architecture.md` and at least one module
 > spec must exist. If specs are missing, run **chsh-sk-ncs-2-dev-spec** first.
@@ -19,14 +21,51 @@ Uses two real project repositories as reference implementations.
 
 ---
 
-## Reference Implementations
+## Reusable Modules — check zego bricks first
 
-Before writing any code, browse both repos to understand the patterns in use:
+Before creating any `src/modules/<name>/`, check whether it already exists as a
+**zego brick** at `/opt/nordic/ncs/v3.4.0/zego/bricks/` — a standalone, portable
+Zephyr module with its own Kconfig, hardware-abstraction backends, and spec doc.
+If it matches, **wire it in via Kconfig — do not copy its source or re-derive its
+state machine** from an app that used to implement the same thing inline.
+
+| Brick | Directory | Covers | Spec |
+|-------|-----------|--------|------|
+| button | `zego/bricks/button/` | GPIO button, debounce, gesture classification (click/double-click/long-press), `BUTTON_CHAN` | `zego/bricks/button/docs/button-spec.md` |
+| led | `zego/bricks/led/` | Per-LED SMF, ROTATE/BLINK/BREATHE effects, `LED_CMD_CHAN`/`LED_STATE_CHAN` | `zego/bricks/led/docs/led-spec.md` |
+| wifi (`app_main`) | `zego/bricks/wifi/` | Startup banner, Wi-Fi mode selector + NVS persistence, `zego_wifi_mode` shell command | `zego/bricks/wifi/docs/wifi-spec.md` |
+| network | `zego/bricks/network/` | Wi-Fi event dispatch (STA/SoftAP/P2P_GO/P2P_GC), DHCP, weak-hook callback API | `zego/bricks/network/docs/network-spec.md` |
+| wifi_ble_prov | `zego/bricks/wifi_ble_prov/` | BLE GATT Wi-Fi credential provisioning | `zego/bricks/wifi_ble_prov/docs/wifi-ble-prov-spec.md` |
+| ux | `zego/bricks/ux/` | Button-gesture-to-action wiring, LED Wi-Fi-state feedback, weak-hook gesture overrides | `zego/bricks/ux/docs/ux-spec.md` |
+| ntp | `zego/bricks/ntp/` | SNTP time sync, real-world `CLOCK_REALTIME` | `zego/bricks/ntp/docs/ntp-spec.md` |
+| memonitor | `zego/bricks/memonitor/` | Periodic heap/thread watermark sampler, `MEMONITOR_CHAN` | `zego/bricks/memonitor/docs/memonitor-spec.md` |
+
+Wiring pattern (from any brick's spec, or `zego/README.md`):
+
+```cmake
+# CMakeLists.txt — before find_package(Zephyr ...)
+get_filename_component(ZEGO_BUTTON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../zego/bricks/button REALPATH)
+list(APPEND EXTRA_ZEPHYR_MODULES ${ZEGO_BUTTON_DIR})
+```
+```conf
+# prj.conf
+CONFIG_ZEGO_BUTTON=y
+```
+
+See `zego/nordic-wifi-app-template/` for a complete app wiring all eight bricks
+together in one `CMakeLists.txt`/`prj.conf` — the fastest way to see the pattern
+end to end, and itself built with `chsh-sk-ncs-0-workflow`.
+
+---
+
+## Reference Implementations — patterns not (yet) in a brick
+
+For everything else, browse these two real projects:
 
 | Repo | Patterns to reference |
 |------|-----------------------|
-| [`nordic-wifi-webdash`](https://github.com/chshzh/nordic-wifi-webdash) | **SMF+Zbus** modular architecture, multi-mode Wi-Fi (SoftAP/STA/P2P_GO/P2P_CLIENT), `mode_selector` NVS+shell pattern, HTTP webserver with gzip static assets from flash, REST API design, event-triggered service start on zbus (`CLIENT_CONNECTED_CHAN`) |
-| [`nordic-wifi-memfault`](https://github.com/chshzh/nordic-wifi-memfault) | **SYS_INIT+Zbus** event-driven modules (no SMF), Memfault metrics/coredump/OTA, BLE Wi-Fi credential provisioning, NTP time sync, disconnect-time log persist to external flash, optional MQTT/HTTPS/CDR modules via Kconfig flags, button-driven debug flows |
+| [`nordic-wifi-webdash`](https://github.com/chshzh/nordic-wifi-webdash) | HTTP webserver with gzip static assets from flash, REST API design, event-triggered service start on zbus (`CLIENT_CONNECTED_CHAN`) |
+| [`nordic-wifi-memfault`](https://github.com/chshzh/nordic-wifi-memfault) | Memfault metrics/coredump/OTA, disconnect-time log persist to external flash, optional MQTT/HTTPS/CDR modules via Kconfig flags |
 
 Use the `gh` CLI to read specific files from these public repos when
 implementing a similar module (e.g.
@@ -48,28 +87,40 @@ Identify what needs to be created vs updated:
 - **Specs changed**: compare spec Revision History against `git log -- docs/dev-specs/` → implement only changed modules
 - **Bug fix**: no spec change → go directly to the affected module
 
+> **Guard — check before writing any code.** If the conversation contains
+> discussed-but-undocumented changes: requirements changed → route to
+> **chsh-sk-ncs-1-pm-prd** first; only implementation/spec details changed → route to
+> **chsh-sk-ncs-2-dev-spec** first. Never touch `src/` until PRD and specs are current.
+> "Start implementation" does not bypass this — it's the same rule
+> `chsh-sk-ncs-0-workflow`'s Phase 3 section documents, restated here because this is
+> normally where you actually enter, not there.
+
 ---
 
 ## Step 1 — Browse Reference Implementations
 
-For each module in the spec, find the closest analogue in the reference repos:
+For each module in the spec, first check the zego bricks table above. Only fall
+back to these reference repos for what's not covered there:
 
 ```
-# SMF module (state machine + Zbus publish)
-# → reference: nordic-wifi-webdash/src/modules/button/   (SMF 3-state, BUTTON_CHAN publish)
-# → reference: nordic-wifi-webdash/src/modules/led/      (SMF 2-state per LED, LED_CMD_CHAN/LED_STATE_CHAN)
+# SMF module (state machine + Zbus publish) — a brick already covers this shape:
+# → zego/bricks/button/  (5-state gesture FSM, BUTTON_CHAN publish) — wire it in, don't reimplement
+# → zego/bricks/led/     (per-LED SMF, LED_CMD_CHAN/LED_STATE_CHAN) — wire it in, don't reimplement
+# Write a new SMF module only for logic that isn't hardware-button/LED shaped.
 
-# SYS_INIT + Zbus listener/subscriber module (no SMF)
-# → reference: nordic-wifi-memfault/src/modules/network/          (WIFI_CHAN + NETWORK_CHAN publish)
-# → reference: nordic-wifi-memfault/src/modules/app_memfault/core/ (zbus subscriber, upload on connect)
+# SYS_INIT + Zbus listener/subscriber module (no SMF) — also often already a brick:
+# → zego/bricks/network/    (Wi-Fi event dispatch, weak-hook callback API)
+# → zego/bricks/memonitor/  (periodic sampler, MEMONITOR_CHAN publish)
+# → reference: nordic-wifi-memfault/src/modules/app_memfault/core/ (zbus subscriber, upload on connect — Memfault-specific, not a brick)
 
-# Library wrapper module (wraps external SDK or Zephyr subsystem)
+# Library wrapper module (wraps external SDK or Zephyr subsystem) — not brick-covered:
 # → reference: nordic-wifi-memfault/src/modules/app_memfault/     (Memfault SDK wrapper with core/metrics/ota/cdr)
 # → reference: nordic-wifi-webdash/src/modules/webserver/         (Zephyr HTTP server + REST API wrapper)
 
 # Main.c + Kconfig + CMakeLists.txt patterns
-# → reference: nordic-wifi-memfault/CMakeLists.txt, Kconfig, prj.conf  (shell disabled, ZMS settings)
-# → reference: nordic-wifi-webdash/CMakeLists.txt, Kconfig, prj.conf   (shell enabled, NVS settings)
+# → zego/nordic-wifi-app-template/  (wires all 8 bricks via EXTRA_ZEPHYR_MODULES — the current canonical pattern)
+# → reference: nordic-wifi-memfault/CMakeLists.txt, Kconfig, prj.conf  (shell disabled, ZMS settings — Memfault-specific)
+# → reference: nordic-wifi-webdash/CMakeLists.txt, Kconfig, prj.conf   (shell enabled, NVS settings — webserver-specific)
 ```
 
 Look for: how Zbus channels are declared, how `SYS_INIT` is used, how Kconfig
@@ -79,7 +130,8 @@ guards modules, how callbacks are wired to the rest of the app.
 
 ## Step 2 — Implement
 
-For each module from the spec:
+For each module from the spec (skip to Step 2 item 2 if it's a zego brick — no
+`src/modules/<name>/` to create, just wire the Kconfig):
 
 1. Create `src/modules/<name>/` with:
    - `<name>.c` — state machine/thread loop, Zbus integration, callback implementations
@@ -96,19 +148,93 @@ For each module from the spec:
    ```kconfig
    # Track which PRD and specs revision this code was written against.
    # Copy the newest Changelog timestamp from each document.
-   CONFIG_ZEGO_APP_PRD_VERSION="YYYY-MM-DD-HH-MM"    # from docs/pm-prd/PRD.md Changelog
-   CONFIG_ZEGO_APP_SPECS_VERSION="YYYY-MM-DD-HH-MM"  # from docs/dev-specs/0-overview.md Changelog
+   CONFIG_APP_PRD_VERSION="YYYY-MM-DD-HH-MM"    # from docs/pm-prd/PRD.md Changelog
+   CONFIG_APP_SPECS_VERSION="YYYY-MM-DD-HH-MM"  # from docs/dev-specs/0-overview.md Changelog
    ```
    Update these values every time the code is re-synced to a new PRD or specs revision.
    They appear in the boot banner as `PRD: ...` and `Specs: ...`.
 
-4. Build and verify:
+4. **Host test — pure-logic modules only.** If this module has a pure-logic entry
+   point (parsing, credential validation, a state-transition decision — a function
+   that takes plain data in and returns plain data out, with no `zephyr/drivers/*`
+   call in its path), write a `ztest` suite and run it on `native_sim` **before**
+   building for the target board. This is the fast inner loop: no board, no UART, no
+   wait — iterate here until it passes, then move to Step 5.
+
+   Don't force it. If the module's logic isn't already separable from its hardware
+   I/O, restructuring it just to make it testable is not worth the detour — skip
+   host testing for that module and go straight to Step 5.
+
+   ```
+   tests/modules/<name>/
+   ├── CMakeLists.txt   # pulls in src/modules/<name>/<name>.c directly — the real
+   │                    # module, never a copy — so a passing test means the shipped
+   │                    # code works, not a reimplementation of it
+   ├── prj.conf         # CONFIG_ZTEST=y + whatever Kconfig the module itself needs
+   ├── testcase.yaml    # integration_platforms: [native_sim]
+   └── src/main.c       # ZTEST_SUITE + ZTEST() cases
+   ```
+
+   `tests/modules/<name>/CMakeLists.txt`:
+   ```cmake
+   cmake_minimum_required(VERSION 3.20.0)
+   find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+   project(test_<name>)
+   target_sources(app PRIVATE
+     src/main.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/modules/<name>/<name>.c
+   )
+   target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/modules/<name>)
+   ```
+
+   `tests/modules/<name>/prj.conf`:
+   ```kconfig
+   CONFIG_ZTEST=y
+   ```
+
+   `tests/modules/<name>/testcase.yaml`:
+   ```yaml
+   common:
+     integration_platforms:
+       - native_sim
+     tags:
+       - unit
+   tests:
+     modules.<name>.unit: {}
+   ```
+
+   `tests/modules/<name>/src/main.c`:
+   ```c
+   #include <zephyr/ztest.h>
+   #include "<name>.h"
+
+   ZTEST_SUITE(<name>_suite, NULL, NULL, NULL, NULL, NULL);
+
+   ZTEST(<name>_suite, test_valid_input)
+   {
+       /* call the module's pure-logic function directly; assert on the result */
+   }
+
+   ZTEST(<name>_suite, test_rejects_malformed_input)
+   {
+       /* same, with bad input — assert the error path */
+   }
+   ```
+
+   Build and run:
+   ```bash
+   west build -b native_sim tests/modules/<name> -d build/tests/<name>
+   ./build/tests/<name>/zephyr/zephyr.exe
+   ```
+   Fix, rebuild, rerun — until every case passes.
+
+5. Build and verify on target hardware:
    ```bash
    west build -p -b <board>
    ```
    Fix all warnings. Confirm UART output matches spec test points.
 
-5. Set up CI (new projects only):
+6. Set up CI (new projects only):
    - Read the template at `.claude/skills/chsh-sk-ncs-3-dev-coding/build_template.yml`
    - Replace all `<PLACEHOLDER>` tokens with the project-specific values:
      - `<APP_NAME>` → repo/directory name
@@ -120,9 +246,37 @@ For each module from the spec:
    - Write the result to `.github/workflows/build.yml`
    - If `APP_VERSION_STRING` is not used in the app's `CMakeLists.txt`, remove the version-injection block from the Build step.
 
-6. Handoff:
+7. **Check for doc drift before finishing.** Don't rely on session memory for
+   this — anchor on the pins directly, since coding often spans more than one
+   session:
+
+   ```bash
+   PRD_PIN_BUMP_SHA=$(git log -1 --format='%H' -G'CONFIG_APP_PRD_VERSION' -- prj.conf 2>/dev/null)
+   SPEC_PIN_BUMP_SHA=$(git log -1 --format='%H' -G'CONFIG_APP_SPECS_VERSION' -- prj.conf 2>/dev/null)
+   git log --oneline "${SPEC_PIN_BUMP_SHA}..HEAD" -- src/ 2>/dev/null   # already committed, undeclared
+   git status --short -- src/ 2>/dev/null                              # not committed yet at all
+   ```
+
+   List commits since each pin's last bump plus anything still uncommitted, then
+   classify against the same pattern list `chsh-ag-git` checks at commit time (its
+   Step 2.5 "Step A — Classify the change severity") rather than re-deriving one. If
+   nothing matches, skip this step silently.
+
+   If something matches, call `AskQuestion` before Handoff:
+   ```
+   AskQuestion:
+     prompt: "This session added <what> — docs don't cover it yet. Update them first?"
+     options:
+       - "Update specs now (chsh-sk-ncs-2-dev-spec, Mode B)"
+       - "Update specs and PRD now (also chsh-sk-ncs-1-pm-prd, Mode D) — it's user-visible"
+       - "Skip — I'll update docs separately"
+   ```
+   If the user updates docs, re-read the new Changelog timestamps and bump the pins
+   (Step 2, item 3) before moving on.
+
+8. Handoff:
    > "Implementation complete. Run **chsh-sk-ncs-4-test-verification** for
-   > Verification (code review, clean build, doc audit — no hardware); then run
+   > Verification (code review, clean build, host tests, doc audit — no hardware); then run
    > **chsh-sk-ncs-4-test-validation** for hardware validation."
 
 ---
@@ -224,6 +378,7 @@ Every module **must** have structured logging at all four levels. This enables p
 | `smf_set_state()` in exit functions | Generates a log warning and **no transition occurs**. Only call `smf_set_state()` from entry or run functions. |
 | `SMF_EVENT_PROPAGATE` vs `SMF_EVENT_HANDLED` | Return `SMF_EVENT_PROPAGATE` by default so unhandled events bubble to parents. Only return `SMF_EVENT_HANDLED` when you explicitly consumed the event and do not want the parent to see it. Note: calling `smf_set_state()` already stops propagation regardless of the return value. |
 | Missing HSM Kconfig | `CONFIG_SMF_ANCESTOR_SUPPORT=y` and `CONFIG_SMF_INITIAL_TRANSITION=y` are required for parent/initial transitions. Without them, the `parent` and `initial` parameters in `SMF_CREATE_STATE` are silently ignored — the hierarchy simply does not exist at runtime. |
+| Module won't build for `native_sim` | Usually means the module reaches across the hardware boundary you meant to isolate (a driver call inside the "pure-logic" function). Treat it as a signal to fix the boundary, not an obstacle to route around — don't add driver stubs just to force the build green. |
 
 ---
 
