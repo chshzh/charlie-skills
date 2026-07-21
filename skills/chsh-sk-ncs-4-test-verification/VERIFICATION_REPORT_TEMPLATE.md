@@ -1,4 +1,4 @@
-# QA Report — <Project Name>
+# Verification Report — <Project Name>
 
 ## Document Information
 
@@ -28,16 +28,15 @@
 | Build reflects | Last commit / Uncommitted on-disk state |
 ---
 
-## 1. Security Risk
+## 1. Code Review
 
-| ID | Risk Class | File / Location | Finding | Verdict |
-|----|-----------|----------------|---------|---------|
-| SEC-1 | Hardcoded credentials | | | ✅ Clean / ❌ Issue |
-| SEC-2 | Debug features in release | | | ✅ Clean / ❌ Issue |
-| SEC-3 | HTTP (unencrypted) endpoint | | | ✅ Clean / ❌ Issue |
-| SEC-4 | Key / token in source | | | ✅ Clean / ❌ Issue |
+From `chsh-ag-code-reviewer`'s independent pass (structure, config, standards, security):
 
-**Security result**: ✅ No findings / ❌ _N_ findings — route to Phase 3 immediately
+| Severity | File | Line | Finding |
+|----------|------|------|---------|
+| | | | |
+
+**Code review result**: ✅ No findings / ❌ _N_ findings (any P0 — always security — routes to Phase 3 immediately)
 
 ---
 
@@ -64,7 +63,19 @@ Violations:
 
 ---
 
-## 4. PRD Satisfaction Check (Code Reading)
+## 4. Host Tests
+
+| Suite | Result | Notes |
+|-------|--------|-------|
+| | ✅ PASS / ❌ FAIL / ➖ N/A | |
+
+**Host test result**: ✅ All pass / ❌ _N_ failing (P0 — route to Phase 3) / ➖ No `tests/modules/` present yet
+
+*Candidate modules not yet covered (parsers, state machines, validation logic):*
+
+---
+
+## 5. PRD Satisfaction Check (Code Reading)
 
 | FR | Acceptance Criterion | Code Evidence | Verdict |
 |----|---------------------|---------------|---------|
@@ -77,21 +88,21 @@ Violations:
 
 ---
 
-## 5. Documentation Consistency Audit
+## 6. Documentation Consistency Audit
 
 | Step | Check | Result | Notes |
 |------|-------|--------|-------|
 | A | `0-overview.md` PRD Version field matches latest PRD Changelog timestamp | ✅ / ❌ | |
 | A | All FR/NFR items in PRD traceable to spec | ✅ / ❌ | |
-| B | `CONFIG_ZEGO_APP_SPECS_VERSION` in `prj.conf` matches `0-overview.md` latest Changelog | ✅ / ❌ | |
-| B | `CONFIG_ZEGO_APP_PRD_VERSION` in `prj.conf` matches PRD latest Changelog | ✅ / ❌ | |
+| B | `CONFIG_APP_SPECS_VERSION` in `prj.conf` matches `0-overview.md` latest Changelog | ✅ / ❌ | |
+| B | `CONFIG_APP_PRD_VERSION` in `prj.conf` matches PRD latest Changelog | ✅ / ❌ | |
 | B | Spec modules have `src/modules/<name>/` counterparts | ✅ / ❌ | |
 | C | README features match current PRD FR list | ✅ / ❌ | |
 | C | No stale features in README | ✅ / ❌ | |
 
 ---
 
-## 6. Fixes Applied During This Verification
+## 7. Fixes Applied During This Verification
 
 | File | Fix | Severity |
 |------|-----|----------|
