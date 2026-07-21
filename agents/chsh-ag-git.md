@@ -1,6 +1,6 @@
 ---
 name: chsh-ag-git
-model: claude-haiku-4.5
+model: claude-haiku-4-5-20251001
 description: Git commit + push specialist. Use proactively after a feature is finished or a bug is debugged, or whenever the user asks to "commit", "push", "prepare commits", "split commits", or "wrap up this work". Inspects the worktree, groups changes by logical concern, proposes a commit plan, waits for approval, commits, then optionally pushes (always behind a separate approval gate). Auto-detects Conventional Commits style (user app repos) vs Zephyr style (nrf/, zephyr/, nrfxlib/, modules/).
 ---
 
@@ -111,8 +111,8 @@ When the guard passes, proceed:
 CHANGED=$(git diff --name-only HEAD 2>/dev/null; git diff --cached --name-only; git diff --name-only | sort -u)
 
 # Check version pins already bumped in this batch
-SPEC_PIN_BUMPED=$(git diff prj.conf 2>/dev/null; git diff --cached prj.conf 2>/dev/null | grep "ZEGO_APP_SPECS_VERSION")
-PRD_PIN_BUMPED=$(git diff prj.conf 2>/dev/null; git diff --cached prj.conf 2>/dev/null | grep "ZEGO_APP_PRD_VERSION")
+SPEC_PIN_BUMPED=$(git diff prj.conf 2>/dev/null; git diff --cached prj.conf 2>/dev/null | grep "APP_SPECS_VERSION")
+PRD_PIN_BUMPED=$(git diff prj.conf 2>/dev/null; git diff --cached prj.conf 2>/dev/null | grep "APP_PRD_VERSION")
 
 # Collect the FULL diff of src/ changes for pattern matching
 FULL_DIFF=$(git diff HEAD -- src/ 2>/dev/null; git diff --cached -- src/ 2>/dev/null)
@@ -152,8 +152,8 @@ Read the current version timestamps to show the user what will be out of sync:
 ```bash
 PRD_CURRENT=$(grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}" docs/pm-prd/PRD.md 2>/dev/null | tail -1)
 SPEC_CURRENT=$(grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}" docs/dev-specs/overview.md 2>/dev/null | tail -1)
-CODE_PRD_PIN=$(grep "ZEGO_APP_PRD_VERSION" prj.conf 2>/dev/null | grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}")
-CODE_SPEC_PIN=$(grep "ZEGO_APP_SPECS_VERSION" prj.conf 2>/dev/null | grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}")
+CODE_PRD_PIN=$(grep "APP_PRD_VERSION" prj.conf 2>/dev/null | grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}")
+CODE_SPEC_PIN=$(grep "APP_SPECS_VERSION" prj.conf 2>/dev/null | grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}")
 ```
 
 Add a `⚠ Doc-sync` row to the commit plan table before the numbered commits:
@@ -166,7 +166,7 @@ Add a `⚠ Doc-sync` row to the commit plan table before the numbered commits:
 **Phase 2 only case:**
 | # | Files | Rationale | Suggested message |
 |---|---|---|---|
-| ⚠ Doc | `docs/dev-specs/overview.md` (current: `<SPEC_CURRENT>`), affected `<module>.md` | Implementation boundary change — specs need updating before `CONFIG_ZEGO_APP_SPECS_VERSION` can be bumped | Stop and update Phase 2, or approve to defer |
+| ⚠ Doc | `docs/dev-specs/overview.md` (current: `<SPEC_CURRENT>`), affected `<module>.md` | Implementation boundary change — specs need updating before `CONFIG_APP_SPECS_VERSION` can be bumped | Stop and update Phase 2, or approve to defer |
 
 **Add these as the FIRST options in the Step 4 `AskQuestion` call** (before Approve):
 
