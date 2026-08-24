@@ -19,12 +19,35 @@ not edit source files. You only interact with the Memfault REST API and CLI.
 
 ## Project constants
 
+**There is no default project root.** This agent's parent app (`nordic-wifi-memfault`)
+is checked out under multiple NCS version workspaces at once (e.g.
+`/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`, `/opt/nordic/ncs/v2.6.4/nordic-wifi-memfault`,
+...), and they are **not interchangeable** — each has its own build artifacts, and
+artifacts from one workspace silently "fit" the same upload commands for another
+(same filenames, same board target, different actual firmware). Uploading the wrong
+one is a silent, hard-to-detect failure: the release still installs and even completes
+an OTA download successfully, it just contains the wrong firmware.
+
+**The delegating prompt MUST supply an explicit absolute project root** (or explicit
+absolute artifact paths). If it does not, stop and use `AskQuestion` to ask for it —
+never assume or fall back to a previously-used path from an earlier conversation.
+
+Once given, echo it back and use it verbatim for every path in this task:
+
+```bash
+PROJECT_ROOT="<absolute path supplied by the delegating prompt>"
+echo "Using PROJECT_ROOT=$PROJECT_ROOT"
+cd "$PROJECT_ROOT"
+```
+
 | DK | `--software-type` | `--hardware-version` | ELF | OTA payload |
 |----|-------------------|----------------------|-----|-------------|
-| nrf54lm20dk | `nrf54lm20dk-fw` | `nrf54lm20dk` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
-| nrf7002dk | `nrf7002dk-fw` | `nrf7002dk` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
+| nrf54lm20dk | `nrf54lm20dk-fw` | `nrf54lm20dk` | `$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
+| nrf7002dk | `nrf7002dk-fw` | `nrf7002dk` | `$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf` | `$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin` |
 
-Project root: `/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`
+If the delegating prompt instead supplies pre-built/downloaded artifact paths directly
+(e.g. files under `/tmp/fw/...` from a release download), use those exact paths as-is —
+do NOT substitute the `$PROJECT_ROOT/build_.../zephyr.signed.bin` convention in that case.
 
 ---
 
@@ -37,21 +60,30 @@ Project root: `/opt/nordic/ncs/v3.3.0/nordic-wifi-memfault`
 3. **Verify build artifacts exist** before uploading. If a required `.elf` or
    `.signed.bin` is missing, report it and stop. Do not attempt to build unless
    the delegating prompt explicitly requests a rebuild.
-4. **`FW_VERSION` must match the binary.** Deploying a mismatched version
-   creates an unreachable release silently. Verify before deploying.
+4. **`FW_VERSION` must match the binary — verify this, don't just assert it.**
+   Before every `upload-mcu-symbols`/`upload-ota-payload` call, run
+   `strings -a <file> | grep -m1 -E "^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$"` (or
+   equivalent) on the *exact absolute file path* you are about to upload and
+   confirm the embedded version string matches `$FW_VERSION`. If it doesn't
+   match (or matches a *different* version, e.g. from another workspace), STOP —
+   do not upload — and report the mismatch to the user. This check is what
+   would have caught a v3.4.0.x binary being uploaded as a v2.6.4.1 release.
+5. **Never resolve build paths relative to a hardcoded/remembered project root.**
+   Every path must trace back to the `PROJECT_ROOT` (or explicit artifact paths)
+   given in this task's delegating prompt.
 
 ---
 
 ## Step 0 — Load credentials
 
-Always start here. Read and export CLI credentials from the conf file:
+Always start here. `$PROJECT_ROOT` must already be set per "Project constants" above.
 
 ```bash
-cd /opt/nordic/ncs/v3.3.0/nordic-wifi-memfault
+cd "$PROJECT_ROOT"
 eval $(grep '^# CLI: ' overlay-app-memfault-project-info.conf | sed 's/^# CLI: //')
 FW_VERSION=$(grep '^CONFIG_MEMFAULT_NCS_FW_VERSION=' overlay-app-memfault-project-info.conf \
   | sed 's/.*="\(.*\)"/\1/')
-echo "ORG=$MEMFAULT_ORG  PROJECT=$MEMFAULT_PROJECT  VERSION=$FW_VERSION"
+echo "PROJECT_ROOT=$PROJECT_ROOT  ORG=$MEMFAULT_ORG  PROJECT=$MEMFAULT_PROJECT  VERSION=$FW_VERSION"
 ```
 
 ---
@@ -206,31 +238,61 @@ except urllib.error.HTTPError as e:
 "
 ```
 
-### B3 — Upload symbols with version
+### B3 — Verify artifact identity, then upload symbols with version
+
+**Before every upload in this step**, verify each file's embedded version string
+matches `$FW_VERSION` (Hard rule 4). Abort on any mismatch instead of uploading:
+
+```bash
+for f in "$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf" \
+         "$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf"; do
+  echo "--- $f ---"
+  strings -a "$f" | grep -m3 -E "^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$"
+done
+# Confirm the version(s) printed above match $FW_VERSION exactly before continuing.
+```
 
 ```bash
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
   upload-mcu-symbols --software-type nrf54lm20dk-fw --software-version $FW_VERSION \
-  build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf
+  "$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.elf"
 
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
   upload-mcu-symbols --software-type nrf7002dk-fw --software-version $FW_VERSION \
-  build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf
+  "$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.elf"
 ```
 
-### B4 — Upload OTA payloads
+### B4 — Verify artifact identity, then upload OTA payloads
+
+Same check as B3, run against the `.signed.bin` files actually being uploaded:
+
+```bash
+for f in "$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin" \
+         "$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin"; do
+  echo "--- $f ---"
+  strings -a "$f" | grep -m3 -E "^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$"
+done
+# Confirm the version(s) printed above match $FW_VERSION exactly, and that no OTHER
+# version string (e.g. from a different NCS-workspace build) appears, before uploading.
+```
 
 ```bash
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
   upload-ota-payload --hardware-version nrf54lm20dk --software-type nrf54lm20dk-fw \
   --software-version $FW_VERSION \
-  build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin
+  "$PROJECT_ROOT/build_nrf54lm20dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin"
 
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
   upload-ota-payload --hardware-version nrf7002dk --software-type nrf7002dk-fw \
   --software-version $FW_VERSION \
-  build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin
+  "$PROJECT_ROOT/build_nrf7002dk/nordic-wifi-memfault/zephyr/zephyr.signed.bin"
 ```
+
+**After uploading**, independently re-download the just-uploaded OTA payload from
+Memfault's CDN (via the `releases/latest/url` device-facing endpoint, or the
+symbol/release API) and re-run the same `strings` check against the downloaded
+copy — not just the local file. This confirms the bytes Memfault actually serves
+to devices are correct, not just what you intended to upload.
 
 ### B5 — List cohorts and deploy
 
@@ -272,6 +334,57 @@ For each selected cohort slug (excluding `cancel`), run:
 ```bash
 memfault --org-token $MEMFAULT_ORG_TOKEN --org $MEMFAULT_ORG --project $MEMFAULT_PROJECT \
   deploy-release --release-version $FW_VERSION --cohort <chosen-cohort-slug>
+```
+
+### B6 — Verify the deployed release will actually be served (not just "done")
+
+**A successful `deploy-release` call does NOT guarantee devices will receive
+this version.** Memfault's project may host releases from multiple unrelated
+branches/apps sharing the same cohort. Its "latest release" resolution for a
+device picks the highest active version across ALL `done` deployments sharing
+the identical `(cohort, hardware_version, software_type)` target — not simply
+the most recently deployed one, and not `cohort.last_deployment` either. A
+lower-numbered version can be deployed successfully and still never reach a
+device if a higher-numbered release from a different branch is also active in
+the same cohort for the same hardware_version/software_type.
+
+After every deploy, check for this collision and surface it before reporting
+success:
+
+```bash
+python3 -c "
+import urllib.request, json, base64
+ORG='$MEMFAULT_ORG'; PROJ='$MEMFAULT_PROJECT'; TOKEN='$MEMFAULT_ORG_TOKEN'
+COHORT='<chosen-cohort-slug>'
+BASE = f'https://api.memfault.com/api/v0/organizations/{ORG}/projects/{PROJ}'
+headers = {'Authorization': 'Basic ' + base64.b64encode(f':{TOKEN}'.encode()).decode()}
+req = urllib.request.Request(f'{BASE}/deployments?cohort={COHORT}', headers=headers)
+with urllib.request.urlopen(req) as r:
+    data = json.loads(r.read())
+active = [d for d in data['data'] if d['status'] == 'done']
+print(f'{len(active)} active (done) deployment(s) for cohort {COHORT}:')
+for d in active:
+    print(f\"  {d['release']['version']:20s} release_id={d['release']['id']}  deployed={d['deployed_date']}\")
+"
+```
+
+If more than one `done` deployment targets the same hardware_version +
+software_type as the one you just deployed, and any of them has a
+numerically/lexicographically higher version string than `$FW_VERSION`, **warn
+the user explicitly** — the version you just deployed will likely never be
+served to devices until the higher one is pulled. Do not silently report the
+deploy as a plain success in this case; also do NOT pull the competing
+deployment(s) yourself without `AskQuestion` approval, since they may be
+actively serving a different branch's real fleet.
+
+To empirically confirm what a device would actually receive (optional but
+recommended when a collision is suspected), simulate its own OTA check:
+
+```bash
+PKEY=$(grep '^CONFIG_MEMFAULT_NCS_PROJECT_KEY' "$PROJECT_ROOT/overlay-app-memfault-project-info.conf" | grep -v '^#' | head -1 | sed -E 's/.*="(.*)"/\1/')
+curl -s -D - -o /tmp/mflt_ota_check.bin -H "Memfault-Project-Key: $PKEY" \
+  "https://device.memfault.com/api/v0/releases/latest/url?device_serial=<serial>&hardware_version=<hw>&software_type=<sw>&current_version=<current>"
+strings -a /tmp/mflt_ota_check.bin | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'
 ```
 
 ---

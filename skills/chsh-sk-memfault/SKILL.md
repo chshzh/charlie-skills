@@ -183,18 +183,36 @@ Run both in parallel (background each with `block_until_ms: 0`), then await both
 
 ## Step 3 — Delegate to chsh-ag-memfault
 
+**The agent has no default project root — every delegation MUST state the exact
+absolute project root (or exact absolute artifact paths) being used.** This
+project is checked out under multiple NCS-version workspaces at once (v2.6.4,
+v3.3.0, v3.4.0, ...) with identical filenames but different actual firmware per
+workspace — omitting this caused a real incident where the wrong workspace's
+build got uploaded as another version's OTA payload (see log.md /
+git-commit-gotchas.md-style postmortem in this skill's history). Always resolve
+`$(west topdir)/nordic-wifi-memfault` (or the release-download `/tmp/fw/...`
+directory) to a concrete absolute path yourself before delegating, and paste
+that literal path into the task — never let the agent infer or default it.
+
 After any required rebuild completes, hand off to the agent:
 
 ```
 Invoke subagent: chsh-ag-memfault
-Task: <workflow letter(s) and version, e.g.:
-  "Run Workflow B for version 3.3.0.1 — artifacts are already built."
+Task: <workflow letter(s), version, and explicit absolute project root / artifact paths, e.g.:
+  "Run Workflow B for version 3.3.0.1 — artifacts already built.
+   Project root: /opt/nordic/ncs/v3.3.0/nordic-wifi-memfault"
+  "Run Workflow B for version 3.4.0.1 — artifacts already built.
+   Project root: /opt/nordic/ncs/v3.4.0/nordic-wifi-memfault"
+  "Run Workflow B for version v2.6.4.1 — no rebuild, use these exact artifacts:
+   ELF: /tmp/fw/memfault-v2.6.4.1/nordic-wifi-memfault-nrf7002dk-nord-project-v2.6.4.1.elf
+   OTA payload: /tmp/fw/memfault-v2.6.4.1/nordic-wifi-memfault-nrf7002dk-nord-project-v2.6.4.1.signed.bin"
   "Run Workflow C — list active deployments for 3.3.0.1 and ask which to disable."
-  "Run Workflow A — upload symbols without version (crash debug).">
+  "Run Workflow A — upload symbols without version (crash debug).
+   Project root: /opt/nordic/ncs/v3.3.0/nordic-wifi-memfault">
 ```
 
 The agent handles all pre-flight checks, AskQuestion approval gates, API calls,
-and reporting. Do not duplicate that logic here.
+version-vs-artifact verification, and reporting. Do not duplicate that logic here.
 
 ---
 
