@@ -241,7 +241,7 @@ After any mode:
    - `## License`: copy/paste the template block verbatim.
    - For fixed-pattern sections, preserve section names, order, and structure; only project-specific values/rows should change.
    - Do not rephrase `## Methodology` or `## License`; keep wording identical across projects.
-4. Add a new row to the **Changelog** table:
+4. Add a new row to the **top** of the **Changelog** table (newest first, do not append to the bottom):
    ```markdown
    | YYYY-MM-DD-HH-MM | <one-line summary of changes> |
    ```

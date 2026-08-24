@@ -18,6 +18,8 @@
 
 ## Changelog
 
+*Newest entry first — add new rows at the top, do not append to the bottom.*
+
 | Version | Summary of changes |
 |---|---|
 | YYYY-MM-DD-HH-MM | Initial version |
